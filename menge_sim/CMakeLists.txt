@@ -13,63 +13,52 @@ find_package(catkin REQUIRED COMPONENTS
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
+#find the correct OpenMP flag
+FIND_PACKAGE(OpenMP)
+if(OPENMP_FOUND)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${OpenMP_CXX_FLAGS} -fpermissive -DNDEBUG")
+    set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} ${OpenMP_EXE_LINKER_FLAGS}")
+endif()
 
+FIND_PACKAGE(SDL)
+if(NOT SDL_FOUND)
+	message(STATUS "I will try to link against local libraries")
+	INCLUDE_DIRECTORIES (${PROJECT_SOURCE_DIR}/include)
+	LINK_DIRECTORIES  (${PROJECT_SOURCE_DIR}/lib)
+	SET(SDL_LIBRARY "SDL")
+	SET(SDLMAIN_LIBRARY "SDLmain")
+else()
+	INCLUDE_DIRECTORIES(${SDL_INCLUDE_DIR})
+endif()
 
-## Uncomment this if the package has a setup.py. This macro ensures
-## modules and global scripts declared therein get installed
-## See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
-# catkin_python_setup()
+FIND_PACKAGE(SDL_ttf)
+if(NOT SDLTTF_FOUND)
+	MESSAGE(STATUS "I will try to link against local libraries")
+	INCLUDE_DIRECTORIES (${PROJECT_SOURCE_DIR}/include)
+	LINK_DIRECTORIES  (${PROJECT_SOURCE_DIR}/lib)
+	SET(SDLTTF_LIBRARY "SDL_ttf")
+else()
+	INCLUDE_DIRECTORIES(${SDLTTF_INCLUDE_DIR})
+endif()
 
-################################################
-## Declare ROS messages, services and actions ##
-################################################
+FIND_PACKAGE(SDL_image)
+if(NOT SDLIMAGE_FOUND)
+	message(STATUS "I will try to link against local libraries")
+	INCLUDE_DIRECTORIES (${PROJECT_SOURCE_DIR}/include)
+	LINK_DIRECTORIES  (${PROJECT_SOURCE_DIR}/lib)
+	SET(SDLIMAGE_LIBRARY SDL_image)
+else()
+	INCLUDE_DIRECTORIES(${SDLIMAGE_INCLUDE_DIR})
+endif()
 
-## To declare and build messages, services or actions from within this
-## package, follow these steps:
-## * Let MSG_DEP_SET be the set of packages whose message types you use in
-##   your messages/services/actions (e.g. std_msgs, actionlib_msgs, ...).
-## * In the file package.xml:
-##   * add a build_depend tag for "message_generation"
-##   * add a build_depend and a run_depend tag for each package in MSG_DEP_SET
-##   * If MSG_DEP_SET isn't empty the following dependency has been pulled in
-##     but can be declared for certainty nonetheless:
-##     * add a run_depend tag for "message_runtime"
-## * In this file (CMakeLists.txt):
-##   * add "message_generation" and every package in MSG_DEP_SET to
-##     find_package(catkin REQUIRED COMPONENTS ...)
-##   * add "message_runtime" and every package in MSG_DEP_SET to
-##     catkin_package(CATKIN_DEPENDS ...)
-##   * uncomment the add_*_files sections below as needed
-##     and list every .msg/.srv/.action file to be processed
-##   * uncomment the generate_messages entry below
-##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
+FIND_PACKAGE(OpenGL REQUIRED)
+if(OPENGL_FOUND)
+	INCLUDE_DIRECTORIES(${OPENGL_INCLUDE_DIR})
+endif()
 
-## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
-#   Message1.msg
-#   Message2.msg
-# )
+FIND_PACKAGE(PNG REQUIRED)
 
-## Generate services in the 'srv' folder
-# add_service_files(
-#   FILES
-#   Service1.srv
-#   Service2.srv
-# )
-
-## Generate actions in the 'action' folder
-# add_action_files(
-#   FILES
-#   Action1.action
-#   Action2.action
-# )
-
-## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs
-# )
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -101,9 +90,8 @@ find_package(catkin REQUIRED COMPONENTS
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES menge_sim
-#  CATKIN_DEPENDS menge_core roscpp rospy std_msgs
+  INCLUDE_DIRS include
+  CATKIN_DEPENDS menge_core roscpp rospy std_msgs
 #  DEPENDS system_lib
 )
 
@@ -116,6 +104,7 @@ catkin_package(
 # include_directories(include)
 include_directories(
   ${catkin_INCLUDE_DIRS}
+  ${menge_core_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
@@ -129,7 +118,33 @@ include_directories(
 # add_dependencies(menge_sim ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
-# add_executable(menge_sim_node src/menge_sim_node.cpp)
+file(
+	GLOB_RECURSE
+	source_files
+	${PROJECT_SOURCE_DIR}/src/*.cpp  
+	${PROJECT_SOURCE_DIR}/inc/menge_sim/*.h
+)
+
+add_executable(
+	menge_sim
+	${source_files}
+)
+
+target_link_libraries (menge_sim menge ${OPENGL_LIBRARIES} ${SDL_LIBRARY} ${SDLIMAGE_LIBRARY} ${SDLTTF_LIBRARY} ${PNG_LIBRARY}
+
+${catkin_LIBRARIES})
+
+#file( 
+#  GLOB
+#  EXTRA_FILES
+#  ${PROJECT_SOURCE_DIR}/linux/*
+#  ${PROJECT_SOURCE_DIR}/common/*
+#)
+
+#file( COPY ${EXTRA_FILES} DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION} )
+
+
+
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
@@ -169,11 +184,21 @@ include_directories(
 # )
 
 ## Mark other files for installation (e.g. launch and bag files, etc.)
-# install(FILES
-#   # myfile1
-#   # myfile2
-#   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-# )
+install(DIRECTORY 
+   common/
+   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)
+
+install(DIRECTORY 
+   linux/
+   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)
+
+install(FILES 
+   common/arial.ttf
+   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)
+
 
 #############
 ## Testing ##

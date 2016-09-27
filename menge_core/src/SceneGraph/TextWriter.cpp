@@ -48,7 +48,7 @@ namespace Menge {
 		///////////////////////////////////////////////////////////////////////////
 
 		TextWriter * TextWriter::_instance = 0x0;
-		std::string TextWriter::DEFAULT_FONT = std::string( "arial.ttf" );
+		std::string TextWriter::DEFAULT_FONT = std::string("arial.ttf");
 		const int TextWriter::DEFAULT_SIZE = 20;
 
 		///////////////////////////////////////////////////////////////////////////
