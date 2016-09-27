@@ -1,0 +1,20 @@
+#!/bin/bash
+if [ $# -lt 2 ]; then
+    echo
+	echo "You must specify what kind of example to run (core/plugin), the example name, and the model name"
+    echo "  You can optionally add arguments specifying duration and time step."
+    echo "  Example:"
+    echo "    ./runExample core headon pedvo"
+    echo "    ./runExample core headon pedvo 30"
+    echo "    ./runExample core headon pedvo 30 0.01"
+else 
+	if [ $# = 3 ]; then
+		./menge -p ../examples/$1/$2.xml -m $3 
+	else
+		if [ $# = 4 ]; then
+			./menge -p ../examples/$1/$2.xml -m $3 -d $4
+		else
+			./menge -p ../examples/$1/$2.xml -m $3 -d $4 -t $5			
+		fi
+	fi
+fi
