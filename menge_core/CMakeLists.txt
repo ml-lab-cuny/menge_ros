@@ -85,6 +85,7 @@ catkin_package(
   INCLUDE_DIRS ${Foo_INCLUDE_DIRS}
   LIBRARIES menge 
   CATKIN_DEPENDS cmake_modules roscpp rospy std_msgs
+  DEPENDS OpenMP SDL SDL_ttf SDL_image OpenGL PNG TinyXML
 )
 
 

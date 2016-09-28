@@ -14,50 +14,6 @@ find_package(catkin REQUIRED COMPONENTS
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 #find the correct OpenMP flag
-FIND_PACKAGE(OpenMP)
-if(OPENMP_FOUND)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${OpenMP_CXX_FLAGS} -fpermissive -DNDEBUG")
-    set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} ${OpenMP_EXE_LINKER_FLAGS}")
-endif()
-
-FIND_PACKAGE(SDL)
-if(NOT SDL_FOUND)
-	message(STATUS "I will try to link against local libraries")
-	INCLUDE_DIRECTORIES (${PROJECT_SOURCE_DIR}/include)
-	LINK_DIRECTORIES  (${PROJECT_SOURCE_DIR}/lib)
-	SET(SDL_LIBRARY "SDL")
-	SET(SDLMAIN_LIBRARY "SDLmain")
-else()
-	INCLUDE_DIRECTORIES(${SDL_INCLUDE_DIR})
-endif()
-
-FIND_PACKAGE(SDL_ttf)
-if(NOT SDLTTF_FOUND)
-	MESSAGE(STATUS "I will try to link against local libraries")
-	INCLUDE_DIRECTORIES (${PROJECT_SOURCE_DIR}/include)
-	LINK_DIRECTORIES  (${PROJECT_SOURCE_DIR}/lib)
-	SET(SDLTTF_LIBRARY "SDL_ttf")
-else()
-	INCLUDE_DIRECTORIES(${SDLTTF_INCLUDE_DIR})
-endif()
-
-FIND_PACKAGE(SDL_image)
-if(NOT SDLIMAGE_FOUND)
-	message(STATUS "I will try to link against local libraries")
-	INCLUDE_DIRECTORIES (${PROJECT_SOURCE_DIR}/include)
-	LINK_DIRECTORIES  (${PROJECT_SOURCE_DIR}/lib)
-	SET(SDLIMAGE_LIBRARY SDL_image)
-else()
-	INCLUDE_DIRECTORIES(${SDLIMAGE_INCLUDE_DIR})
-endif()
-
-FIND_PACKAGE(OpenGL REQUIRED)
-if(OPENGL_FOUND)
-	INCLUDE_DIRECTORIES(${OPENGL_INCLUDE_DIR})
-endif()
-
-FIND_PACKAGE(PNG REQUIRED)
 
 
 ################################################
@@ -103,8 +59,8 @@ catkin_package(
 ## Your package locations should be listed before other locations
 # include_directories(include)
 include_directories(
+  ${PROJECT_SOURCE_DIR}/include/menge_sim/
   ${catkin_INCLUDE_DIRS}
-  ${menge_core_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
@@ -122,7 +78,7 @@ file(
 	GLOB_RECURSE
 	source_files
 	${PROJECT_SOURCE_DIR}/src/*.cpp  
-	${PROJECT_SOURCE_DIR}/inc/menge_sim/*.h
+	${PROJECT_SOURCE_DIR}/include/menge_sim/*.h
 )
 
 add_executable(
@@ -130,9 +86,7 @@ add_executable(
 	${source_files}
 )
 
-target_link_libraries (menge_sim menge ${OPENGL_LIBRARIES} ${SDL_LIBRARY} ${SDLIMAGE_LIBRARY} ${SDLTTF_LIBRARY} ${PNG_LIBRARY}
-
-${catkin_LIBRARIES})
+target_link_libraries (menge_sim menge ${catkin_LIBRARIES})
 
 #file( 
 #  GLOB
