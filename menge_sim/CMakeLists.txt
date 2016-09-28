@@ -8,6 +8,7 @@ find_package(catkin REQUIRED COMPONENTS
   menge_core
   roscpp
   rospy
+  roslib
   std_msgs
 )
 
@@ -47,7 +48,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
-  CATKIN_DEPENDS menge_core roscpp rospy std_msgs
+  CATKIN_DEPENDS menge_core roscpp rospy std_msgs roslib
 #  DEPENDS system_lib
 )
 
@@ -88,14 +89,14 @@ add_executable(
 
 target_link_libraries (menge_sim menge ${catkin_LIBRARIES})
 
-#file( 
-#  GLOB
-#  EXTRA_FILES
-#  ${PROJECT_SOURCE_DIR}/linux/*
-#  ${PROJECT_SOURCE_DIR}/common/*
-#)
+file( 
+  GLOB
+  EXTRA_FILES
+  ${PROJECT_SOURCE_DIR}/linux/*
+  ${PROJECT_SOURCE_DIR}/common/*
+)
 
-#file( COPY ${EXTRA_FILES} DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION} )
+file( COPY ${EXTRA_FILES} DESTINATION ${CATKIN_DEVEL_PREFIX}/lib/${PROJECT_NAME} )
 
 
 
@@ -138,20 +139,19 @@ target_link_libraries (menge_sim menge ${catkin_LIBRARIES})
 # )
 
 ## Mark other files for installation (e.g. launch and bag files, etc.)
-install(DIRECTORY 
-   common/
-   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-)
+#install(DIRECTORY 
+#   common/
+#   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+#)
 
-install(DIRECTORY 
-   linux/
-   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-)
+#install(DIRECTORY 
+#   linux/
+#   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+#)
 
-install(FILES 
-   common/arial.ttf
-   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-)
+#install(FILES arial.ttf
+#   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+#)
 
 
 #############
