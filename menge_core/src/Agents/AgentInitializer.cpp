@@ -62,6 +62,7 @@ namespace Menge {
 		const float PRIORITY = 0.f;					///< The default priority
 		const float MAX_ANGLE_VEL = TWOPI;			///< The default maximum angular velocity
 		const size_t OBSTACLE_SET = 0xFFFFFFFF;		///< The default obstacle set (all obstacles)
+		const int EXTERNAL = 0;				///< The default agent is internally controlled  
 
 		////////////////////////////////////////////////////////////////
 		
@@ -83,6 +84,7 @@ namespace Menge {
 			_obstacleSet = OBSTACLE_SET;
 			_priority = PRIORITY;
 			_class = CLASS;
+			_isExternal = EXTERNAL;
 		}
 
 		////////////////////////////////////////////////////////////////
@@ -98,6 +100,7 @@ namespace Menge {
 			_obstacleSet = init._obstacleSet;
 			_priority = init._priority;
 			_class = init._class;
+			_isExternal = init._isExternal;
 
 			std::vector< BFSM::VelModifier * >::const_iterator vItr = init._velModifiers.begin();
 			for ( ; vItr != init._velModifiers.end(); ++vItr ) {
@@ -142,6 +145,7 @@ namespace Menge {
 			_priority = PRIORITY;
 			_obstacleSet = OBSTACLE_SET;
 			_class = CLASS;
+			_isExternal = EXTERNAL;
 		}
 
 		////////////////////////////////////////////////////////////////
@@ -193,6 +197,7 @@ namespace Menge {
 			agent->_obstacleSet = _obstacleSet;
 			agent->_priority = _priority;
 			agent->_class = _class;
+			agent->_isExternal = _isExternal;
 			
 			std::vector< BFSM::VelModifier * >::iterator vItr = _velModifiers.begin();
 			for ( ; vItr != _velModifiers.end(); ++vItr ) {
@@ -234,6 +239,8 @@ namespace Menge {
 				result = constSizet( _class, value );
 			} else if ( paramName == "priority" ) {
 				result = constFloat( _priority, value );
+			} else if ( paramName == "external" ) {
+				result = constSizet( _isExternal, value);
 			}
 
 			if ( result == FAILURE ) {
@@ -285,7 +292,7 @@ namespace Menge {
 			} else if ( propName == "r" ) {
 				result = getFloatGenerator( _radius, node );
 			} else if ( propName == "max_angle_vel" ) {
-				result = getFloatGenerator( _maxAngVel, node, DEG_TO_RAD );
+				result = getFloatGenerator(_maxAngVel, node, DEG_TO_RAD );
 			}
 			if ( result == FAILURE ) {
 				logger << Logger::ERR_MSG << "Error extracting value distribution from Property " << propName << ".";

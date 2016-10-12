@@ -141,18 +141,34 @@ namespace Menge {
 			const size_t ID = agent->_id;
 			// Evalute the new state's velocity
 
+						
 			//generate a preferred velocity for passing around
 			Agents::PrefVelocity newVel;
 
 			_currNode[ ID ]->getPrefVelocity( agent, newVel);
 
 			//TODO: My velocity modifiers here
-			 
+			
+			
+
 			std::vector< VelModifier * >::iterator vItr = _velModifiers.begin();
 			for ( ; vItr != _velModifiers.end(); ++vItr ) {   //TODO: replace global vel mod initalizer
 				(*vItr)->adaptPrefVelocity(agent, newVel);
 			}
-
+			if(agent->_isExternal){
+				std::cout << "External Agent detected : " << ID << std::endl;
+				std::string direction;
+				float x,y;
+				//std::cin >> direction;
+				x = 0; y = -1;
+				//if(direction == "a") { x = -1; y =  0;}
+				//if(direction == "d") { x =  1; y =  0;}
+				//if(direction == "w") { x =  0; y =  1;}
+ 				//if(direction == "s") { x =  0; y = -1;}
+				Agents::PrefVelocity newVel2( Vector2(x,y), 1.f, Vector2(0.f,0.f));
+				newVel = newVel2;
+				std::cout << "Direction Set!" << std::endl;
+			}
 
 			//agent will now have a set preferred velocity method
 			agent->setPreferredVelocity(newVel);

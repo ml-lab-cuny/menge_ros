@@ -54,6 +54,7 @@ Any questions or comments should be sent to the authors {menge,geom}@cs.unc.edu
 #include <vector>
 #include <cassert>
 #include <map>
+#include <iostream>
 #ifndef _MSC_VER
 #include <string.h>
 #endif

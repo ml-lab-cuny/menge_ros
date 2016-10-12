@@ -198,6 +198,11 @@ namespace Menge {
 			float _maxAccel;
 
 			/*!
+			 *	@brief		Is agent externally controlled.
+			 */
+			bool _isExternal;
+
+			/*!
 			 *	@brief		The preferred speed of the agent
 			 */
 			float _prefSpeed;	

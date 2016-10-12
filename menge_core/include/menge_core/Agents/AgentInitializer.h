@@ -410,7 +410,12 @@ namespace Menge {
 			size_t _class;
 
 			/*!
-			 *  @brief		Velocity Modifiers to be applied to this class
+			 *	@brief		Is the agent control by external input.  See Agents::BaseAgent::_isExternal for details.
+			 */
+			size_t _isExternal;
+
+			/*!
+			 *      @brief		Velocity Modifiers to be applied to this class
 			 */
 			std::vector<BFSM::VelModifier *> _velModifiers;
 

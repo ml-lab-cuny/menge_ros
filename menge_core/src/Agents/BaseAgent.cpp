@@ -51,6 +51,7 @@ namespace Menge {
 			_maxSpeed = 2.5f;
 			_maxAccel = 2.f;
 			_prefSpeed = 1.34f;
+			_isExternal = false;
 			_pos = Vector2( 0.f, 0.f );
 			_vel = Vector2( 0.f, 0.f );
 			_velPref = PrefVelocity( Vector2(1.f,0.f), _prefSpeed, Vector2(0.f,0.f) );
