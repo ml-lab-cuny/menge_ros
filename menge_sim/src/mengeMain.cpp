@@ -66,6 +66,7 @@ Any questions or comments should be sent to the authors {menge,geom}@cs.unc.edu
 
 //ROS
 #include <ros/ros.h>
+#include <geometry_msgs/Twist.h>
 
 using namespace Menge;
 
@@ -86,6 +87,17 @@ std::string ROOT;
 
 SimulatorDB simDB;
 
+
+void velCallback(const geometry_msgs::Twist& msg)
+{
+   ROS_INFO("I heard: x :[%f]", msg.linear.x);
+   ROS_INFO("I heard: y :[%f]", msg.linear.y);
+   ROS_INFO("I heard: z :[%f]", msg.linear.z);
+   ROS_INFO("I heard: x :[%f]", msg.angular.x);
+   ROS_INFO("I heard: y :[%f]", msg.angular.y);
+   ROS_INFO("I heard: z :[%f]", msg.angular.z);
+}
+
 /*!
  *	@brief		Initialize and start the simulation.
  *
@@ -104,7 +116,12 @@ SimulatorDB simDB;
  *	@param		dumpPath		The path to write screen grabs.  Only used in windows.
  *	@returns	0 for a successful run, non-zero otherwise.
  */
-int simMain( SimulatorDBEntry * dbEntry, const std::string & behaveFile, const std::string & sceneFile, const std::string & outFile, const std::string & scbVersion, bool visualize, const std::string & viewCfgFile, const std::string & dumpPath ) {
+int simMain( SimulatorDBEntry * dbEntry, const std::string & behaveFile, const std::string & sceneFile, const std::string & outFile, const std::string & scbVersion, bool visualize, const std::string & viewCfgFile, const std::string & dumpPath, ros::NodeHandle * nh) {
+	
+	
+	ros::Subscriber sub = nh->subscribe("menge/cmd_vel", 1000, velCallback);
+	ros::spin();
+
 	size_t agentCount;
 	if ( outFile != "" ) logger << Logger::INFO_MSG << "Attempting to write scb file: " << outFile << "\n";
 	SimSystem * system = dbEntry->getSimulatorSystem( agentCount, TIME_STEP, SUB_STEPS, SIM_DURATION, behaveFile, sceneFile, outFile, scbVersion, visualize, VERBOSE );
@@ -179,6 +196,7 @@ int simMain( SimulatorDBEntry * dbEntry, const std::string & behaveFile, const s
 	return 0;
 }
 
+
 int main(int argc, char* argv[]) {
 
 	ros::init(argc,argv,"menge_sim");
@@ -241,7 +259,7 @@ int main(int argc, char* argv[]) {
 		return 1;
 	}
 
-	int result = simMain( simDBEntry, projSpec.getBehavior(), projSpec.getScene(), projSpec.getOutputName(), projSpec.getSCBVersion(), useVis, viewCfgFile, dumpPath );
+	int result = simMain( simDBEntry, projSpec.getBehavior(), projSpec.getScene(), projSpec.getOutputName(), projSpec.getSCBVersion(), useVis, viewCfgFile, dumpPath , &nh);
 
 	if ( result ) {
 		std::cerr << "Simulation terminated through error.  See error log for details.\n";

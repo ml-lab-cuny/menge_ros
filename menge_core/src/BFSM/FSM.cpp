@@ -161,6 +161,7 @@ namespace Menge {
 				float x,y;
 				//std::cin >> direction;
 				x = 0; y = -1;
+				//anoop
 				//if(direction == "a") { x = -1; y =  0;}
 				//if(direction == "d") { x =  1; y =  0;}
 				//if(direction == "w") { x =  0; y =  1;}

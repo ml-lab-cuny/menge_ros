@@ -9,6 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   roslib
+  geometry_msgs
   std_msgs
 )
 
@@ -48,7 +49,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
-  CATKIN_DEPENDS menge_core roscpp rospy std_msgs roslib
+  CATKIN_DEPENDS menge_core roscpp rospy std_msgs geometry_msgs roslib
 #  DEPENDS system_lib
 )
 
