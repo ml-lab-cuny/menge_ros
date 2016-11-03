@@ -98,6 +98,7 @@ void velCallback(const geometry_msgs::Twist& msg)
    ROS_INFO("I heard: z :[%f]", msg.angular.z);
 }
 
+
 /*!
  *	@brief		Initialize and start the simulation.
  *
@@ -117,14 +118,11 @@ void velCallback(const geometry_msgs::Twist& msg)
  *	@returns	0 for a successful run, non-zero otherwise.
  */
 int simMain( SimulatorDBEntry * dbEntry, const std::string & behaveFile, const std::string & sceneFile, const std::string & outFile, const std::string & scbVersion, bool visualize, const std::string & viewCfgFile, const std::string & dumpPath, ros::NodeHandle * nh) {
-	
-	
-	ros::Subscriber sub = nh->subscribe("menge/cmd_vel", 1000, velCallback);
-	ros::spin();
 
 	size_t agentCount;
 	if ( outFile != "" ) logger << Logger::INFO_MSG << "Attempting to write scb file: " << outFile << "\n";
-	SimSystem * system = dbEntry->getSimulatorSystem( agentCount, TIME_STEP, SUB_STEPS, SIM_DURATION, behaveFile, sceneFile, outFile, scbVersion, visualize, VERBOSE );
+	//Initialize simulator	
+	SimSystem * system = dbEntry->getSimulatorSystem( agentCount, TIME_STEP, SUB_STEPS, SIM_DURATION, behaveFile, sceneFile, outFile, scbVersion, visualize, VERBOSE,nh);
 
 	if ( system == 0x0 ) {
 		return 1;

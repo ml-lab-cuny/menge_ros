@@ -137,7 +137,7 @@ namespace Menge {
 													  const std::string & outFile, 
 													  const std::string & scbVersion, 
 													  bool visualize, 
-													  bool VERBOSE ) 
+													  bool VERBOSE, ros::NodeHandle *nh ) 
 	{
 
 		_sim = initSimulator( sceneFile, VERBOSE );
@@ -148,6 +148,7 @@ namespace Menge {
 		float specTimeStep = _sim->getTimeStep();
 
 		_fsm = initFSM( behaveFile, _sim, VERBOSE );
+		_fsm->addNodeHandle(nh);
 		if ( !_fsm ) {
 			return 0x0;
 		}

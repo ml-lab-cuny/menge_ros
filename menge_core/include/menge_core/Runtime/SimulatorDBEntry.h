@@ -51,6 +51,7 @@ Any questions or comments should be sent to the authors {menge,geom}@cs.unc.edu
 #include <string>
 #include <iostream>
 #include "CoreConfig.h"
+#include <ros/ros.h>
 
 namespace Menge {
 
@@ -170,7 +171,8 @@ namespace Menge {
 										 const std::string & outFile, 
 										 const std::string & scbVersion, 
 										 bool visualize, 
-										 bool VERBOSE );
+										 bool VERBOSE,
+										 ros::NodeHandle *nh);
 
 		/*!
 		 *	@brief		Populates the given GLScene with visualization entities tracked 

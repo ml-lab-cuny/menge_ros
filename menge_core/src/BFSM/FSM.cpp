@@ -45,7 +45,6 @@ Any questions or comments should be sent to the authors {menge,geom}@cs.unc.edu
 #include "FsmContext.h"
 #include "StateContext.h"
 #include "GoalSet.h"
-#include "PrefVelocity.h"
 #include "Events/EventSystem.h"
 
 #include "BaseAgent.h"
@@ -137,6 +136,19 @@ namespace Menge {
 
 		/////////////////////////////////////////////////////////////////////
 		 
+		void FSM::setPrefVelFromMsg( const geometry_msgs::Twist& msg){
+			//copy from message and put into newvel
+			std::cout << "callback" << std::endl;
+			ROS_INFO("I heard: x :[%f]", msg.linear.x);
+   			ROS_INFO("I heard: y :[%f]", msg.linear.y);
+   			ROS_INFO("I heard: z :[%f]", msg.linear.z);
+   			ROS_INFO("I heard: x :[%f]", msg.angular.x);
+   			ROS_INFO("I heard: y :[%f]", msg.angular.y);
+   			ROS_INFO("I heard: z :[%f]", msg.angular.z);
+		        Agents::PrefVelocity prefVel( Vector2(msg.linear.x,msg.linear.y), 1.f, Vector2(0.f,0.f));
+			prefVelMsg = prefVel;
+		}
+
 		void FSM::computePrefVelocity( Agents::BaseAgent * agent ) {
 			const size_t ID = agent->_id;
 			// Evalute the new state's velocity
@@ -157,18 +169,12 @@ namespace Menge {
 			}
 			if(agent->_isExternal){
 				std::cout << "External Agent detected : " << ID << std::endl;
-				std::string direction;
-				float x,y;
-				//std::cin >> direction;
-				x = 0; y = -1;
-				//anoop
-				//if(direction == "a") { x = -1; y =  0;}
-				//if(direction == "d") { x =  1; y =  0;}
-				//if(direction == "w") { x =  0; y =  1;}
- 				//if(direction == "s") { x =  0; y = -1;}
-				Agents::PrefVelocity newVel2( Vector2(x,y), 1.f, Vector2(0.f,0.f));
-				newVel = newVel2;
-				std::cout << "Direction Set!" << std::endl;
+				//Agents::PrefVelocity newVel2;
+				ros::spinOnce();
+				std::cout << "Message read" << std::endl;
+				newVel = prefVelMsg;
+				std::cout << (newVel.getPreferred()).x() << " : " << (newVel.getPreferred()).y() << std::endl;
+				std::cout << "Direction Set from the ROS message!" << std::endl;
 			}
 
 			//agent will now have a set preferred velocity method

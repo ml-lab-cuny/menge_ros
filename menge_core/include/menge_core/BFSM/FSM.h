@@ -50,9 +50,14 @@ Any questions or comments should be sent to the authors {menge,geom}@cs.unc.edu
 #include "fsmCommon.h"
 #include "FSMDescrip.h"
 #include "MengeException.h"
+#include "PrefVelocity.h"
 
 #include <vector>
 #include <cassert>
+
+// ROS
+#include <ros/ros.h>
+#include <geometry_msgs/Twist.h>
 #include <map>
 #include <iostream>
 #ifndef _MSC_VER
@@ -345,6 +350,21 @@ namespace Menge {
 			 *	@param		v		The modifier to add
 			 */
 			void addVelModifier( VelModifier * v ) { _velModifiers.push_back( v ); }
+			/*!
+			 *	@brief		Callback function for the ros message
+			 *
+			 *	@param		msg and pref velocity		
+			 */
+			void setPrefVelFromMsg( const geometry_msgs::Twist& msg);
+			/*!
+			 *	@brief		Add ROS node handle to FSM
+			 *
+			 *	@param		pointer to node handle		
+			 */
+			void addNodeHandle( ros::NodeHandle *nh){
+				_nh = nh;
+				_sub = _nh->subscribe("menge/cmd_vel", 1000, &Menge::BFSM::FSM::setPrefVelFromMsg, this);
+			}
 
 		protected:
 			/*!
@@ -383,6 +403,12 @@ namespace Menge {
 			 *	@brief		A list of velocity modifiers to be applied to all states in the simulator
 			 */
 			std::vector< VelModifier * >	_velModifiers;
+			/*!
+			 *	@brief		ROS node handle
+			 */			
+			ros::NodeHandle *_nh;
+			ros::Subscriber _sub;
+			Agents::PrefVelocity prefVelMsg;
 
 		};
 
