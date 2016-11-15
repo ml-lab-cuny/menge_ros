@@ -58,6 +58,9 @@ Any questions or comments should be sent to the authors {menge,geom}@cs.unc.edu
 // ROS
 #include <ros/ros.h>
 #include <geometry_msgs/Twist.h>
+#include <geometry_msgs/PoseArray.h>
+#include <geometry_msgs/Pose.h>
+
 #include <map>
 #include <iostream>
 #ifndef _MSC_VER
@@ -364,7 +367,15 @@ namespace Menge {
 			void addNodeHandle( ros::NodeHandle *nh){
 				_nh = nh;
 				_sub = _nh->subscribe("menge/cmd_vel", 1000, &Menge::BFSM::FSM::setPrefVelFromMsg, this);
+				_pub_crowd = _nh->advertise<geometry_msgs::PoseArray>("menge/crowd_pose", 50);
+				_pub_pose = _nh->advertise<geometry_msgs::Pose>("menge/robot_pose", 50);
 			}
+			/*!
+			 *	@brief		return ROS node handle
+			 *
+			 *	@param		void		
+			 */
+			ros::NodeHandle* getNodeHandle(){return _nh;}
 
 		protected:
 			/*!
@@ -408,6 +419,8 @@ namespace Menge {
 			 */			
 			ros::NodeHandle *_nh;
 			ros::Subscriber _sub;
+			ros::Publisher _pub_crowd;
+			ros::Publisher _pub_pose;
 			Agents::PrefVelocity prefVelMsg;
 
 		};

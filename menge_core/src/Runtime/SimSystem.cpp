@@ -52,6 +52,7 @@ Any questions or comments should be sent to the authors {menge,geom}@cs.unc.edu
 // STL
 #include <set>
 
+
 namespace Menge {
 
 	////////////////////////////////////////////////////////////////////////////
@@ -129,6 +130,7 @@ namespace Menge {
 		}
 		_sim = sim;
 		_fsm = fsm;
+		
 	}
 
 	////////////////////////////////////////////////////////////////////////////

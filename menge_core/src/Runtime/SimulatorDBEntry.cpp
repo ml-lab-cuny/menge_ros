@@ -149,6 +149,7 @@ namespace Menge {
 
 		_fsm = initFSM( behaveFile, _sim, VERBOSE );
 		_fsm->addNodeHandle(nh);
+
 		if ( !_fsm ) {
 			return 0x0;
 		}

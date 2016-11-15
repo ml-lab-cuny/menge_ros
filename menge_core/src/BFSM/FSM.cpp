@@ -137,8 +137,7 @@ namespace Menge {
 		/////////////////////////////////////////////////////////////////////
 		 
 		void FSM::setPrefVelFromMsg( const geometry_msgs::Twist& msg){
-			//copy from message and put into newvel
-			std::cout << "callback" << std::endl;
+			//copy from message and into PrefVelmsg
 			ROS_INFO("I heard: x :[%f]", msg.linear.x);
    			ROS_INFO("I heard: y :[%f]", msg.linear.y);
    			ROS_INFO("I heard: z :[%f]", msg.linear.z);
@@ -168,13 +167,11 @@ namespace Menge {
 				(*vItr)->adaptPrefVelocity(agent, newVel);
 			}
 			if(agent->_isExternal){
-				std::cout << "External Agent detected : " << ID << std::endl;
-				//Agents::PrefVelocity newVel2;
+				//std::cout << "External Agent detected : " << ID << std::endl;
 				ros::spinOnce();
-				std::cout << "Message read" << std::endl;
 				newVel = prefVelMsg;
-				std::cout << (newVel.getPreferred()).x() << " : " << (newVel.getPreferred()).y() << std::endl;
-				std::cout << "Direction Set from the ROS message!" << std::endl;
+				//std::cout << (newVel.getPreferred()).x() << " : " << (newVel.getPreferred()).y() << std::endl;
+				//std::cout << "Direction Set from the ROS message!" << std::endl;
 			}
 
 			//agent will now have a set preferred velocity method
@@ -286,6 +283,7 @@ namespace Menge {
 			int agtCount = (int)this->_sim->getNumAgents();
 			size_t exceptionCount = 0;
 			#pragma omp parallel for reduction(+:exceptionCount)
+			geometry_msgs::PoseArray crowd;
 			for ( int a = 0; a < agtCount; ++a ) {
 				Agents::BaseAgent * agt = this->_sim->getAgent( a );
 				try {
@@ -295,7 +293,27 @@ namespace Menge {
 					logger << Logger::ERR_MSG << e.what() << "\n";
 					++exceptionCount;
 				}
+				geometry_msgs::Pose pose;
+				//std::cout << agt->_id << std::endl;
+				//std::cout <<"pos:" << agt->_pos._x << " " << agt->_pos._y << std::endl;
+				//std::cout <<"vel:" << agt->_vel._x << " " << agt->_vel._y << std::endl;
+				pose.position.x = agt->_pos._x;
+				pose.position.y = agt->_pos._y;
+				pose.position.z = 0;
+				pose.orientation.x = agt->_vel._x;
+				pose.orientation.y = agt->_vel._y;
+				pose.orientation.z = 0;
+				pose.orientation.w = 0;
+				if(agt->_isExternal){
+					_pub_pose.publish(pose);
+				}
+				else{
+					crowd.poses.push_back(pose);
+				}
 			}
+			
+			_pub_crowd.publish(crowd);
+
 			if ( exceptionCount > 0 ) {
 				throw FSMFatalException();
 			}
