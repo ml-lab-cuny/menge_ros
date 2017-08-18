@@ -159,6 +159,18 @@ namespace Menge {
 			inline void setSingle( const Vector2 & dir ) { _left = _preferred = _right = dir; }
 
 			/*!
+			 *	@brief		Sets the preferred velocity to be a single velocity based on the angle of rotation.
+			 *
+			 *	@param		float		Angle of rotation.
+			 */
+			inline void turn(float angle){
+				float new_angle = angle + atan2(_preferred._y, _preferred._x);
+				_preferred._x = cos(new_angle);
+				_preferred._y = sin(new_angle);
+				_target = _left = _right = _preferred;
+			}
+
+			/*!
 			 *	@brief		Gets the target of the preferred velocity.
 			 *
 			 *	@returns	A singe point in space which corresponds to the preferred direction.

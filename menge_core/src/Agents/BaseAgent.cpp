@@ -143,17 +143,18 @@ namespace Menge {
 
 		void BaseAgent::insertAgentNeighbor(const BaseAgent* agent, float distSq) {
 			if (this != agent) {
-				if (_nearAgents.size() != _maxNeighbors || distSq <= getMaxAgentRange()) {
-					if (_nearAgents.size() != _maxNeighbors) {
-						_nearAgents.push_back(NearAgent(distSq, agent));
+				if(_isExternal != true){
+					if (_nearAgents.size() != _maxNeighbors || distSq <= getMaxAgentRange()) {
+						if (_nearAgents.size() != _maxNeighbors) {
+							_nearAgents.push_back(NearAgent(distSq, agent));
+						}
+						size_t i = _nearAgents.size() - 1;
+						while (i != 0 && distSq < _nearAgents[i-1].distanceSquared) {
+							_nearAgents[i] = _nearAgents[i-1];
+							--i;
+						}
+						_nearAgents[i] = NearAgent(distSq, agent);
 					}
-					size_t i = _nearAgents.size() - 1;
-					while (i != 0 && distSq < _nearAgents[i-1].distanceSquared) {
-						_nearAgents[i] = _nearAgents[i-1];
-						--i;
-					}
-					_nearAgents[i] = NearAgent(distSq, agent);
-
 				}
 			}
 		}

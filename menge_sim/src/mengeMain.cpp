@@ -200,11 +200,23 @@ int main(int argc, char* argv[]) {
 	ros::init(argc,argv,"menge_sim");
 	ros::NodeHandle nh;
 	ROS_INFO_STREAM("Hello_semaFORR");
+	//std::string project_path;
+        //nh.getParam("project", project_path);
+
+	//std::string projectSpecFile;
+	//bool ok = ros::param::get("/menge_sim/menge_world",projectSpecFile);
+        //if(!ok){
+	//	ROS_INFO("Could not get menge project spec file");
+	//	exit(1);
+     	//}
 
 	logger.setFile( "log.html" );
 	logger << Logger::INFO_MSG << "initialized logger";
 
+	//ROS_INFO_STREAM(" argument count " << argc << "," << argv[0] << "," << argv[1] << "," << argv[2] << ":"<< project_path);
+
 	std::string exePath( argv[0] );
+	//std::string exePath = projectSpecFile;
 	std::string absExePath;
 	os::path::absPath( exePath, absExePath );
 	std::string tail;
@@ -221,6 +233,7 @@ int main(int argc, char* argv[]) {
 #endif	// _WIN32
 	logger.line();
 	logger << Logger::INFO_MSG << "Plugin path: " << pluginPath;
+	pluginPath = "/home/anooparoor/catkin_ws/devel/lib";
 	plugins.loadPlugins( pluginPath );
 	if ( simDB.modelCount() == 0 ) {
 		logger << Logger::INFO_MSG << "There were no pedestrian models in the plugins folder\n";

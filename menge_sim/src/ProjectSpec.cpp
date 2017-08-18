@@ -54,7 +54,7 @@ ProjectSpec::ProjectSpec() : _projPath("."),
 							 _scbVersion("2.1"),
 							 _verbose(false),
 							 _viewConfig(""),
-							 _duration(400.f),
+							 _duration(40000.f),
 							 _timeStep(-1.f),
 							 _seed(0),
 							 _imgDumpPath(".")
@@ -80,7 +80,7 @@ bool ProjectSpec::parseCommandParameters( int argc, char* argv[], const Simulato
 		TCLAP::ValueArg< std::string > viewCfgArg( "", "view", "A view config file to specify the view - if this argument is specified, do not specify the -i/-interactive argument.", false, "", "string", cmd );
 		TCLAP::ValueArg< std::string > outputArg( "o", "output", "Name of output file (Only writes output if file provided)", false, "", "string", cmd );
 		TCLAP::ValueArg< std::string > versionArg( "", "scbVersion", "Version of scb file to write (1.0, 2.0, 2.1, 2.2, 2.3, or 2.4 -- 2.1 is the default", false, "2.1", "string", cmd );
-		TCLAP::ValueArg< float > durationArg( "d", "duration", "Maximum duration of simulation (if final state is not achieved.)  Defaults to 400 seconds.", false, -1.f, "float", cmd );
+		TCLAP::ValueArg< float > durationArg( "d", "duration", "Maximum duration of simulation (if final state is not achieved.)  Defaults to 4000 seconds.", false, -1.f, "float", cmd );
 		TCLAP::ValueArg< float > timeStepArg( "t", "timeStep", "Override the time step in the scene specification with this one", false, -1.f, "float", cmd );
 		TCLAP::SwitchArg silentArg( "", "verbose", "Make the simulator print loading and simulating progress", cmd, false );
 		TCLAP::ValueArg< int > randomSeedArg( "r", "random", "Specify the global, default random seed.  If not defined, or zero is given, the default seed will be extracted from the system clock every time a default seed is requested.  Otherwise the constant value will be provided.", false, 0, "int", cmd );

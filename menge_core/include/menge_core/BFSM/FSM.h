@@ -60,6 +60,10 @@ Any questions or comments should be sent to the authors {menge,geom}@cs.unc.edu
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/PoseArray.h>
 #include <geometry_msgs/Pose.h>
+#include <geometry_msgs/PoseStamped.h>
+#include <tf/transform_broadcaster.h>
+#include <nav_msgs/Odometry.h>
+#include <sensor_msgs/LaserScan.h>
 
 #include <map>
 #include <iostream>
@@ -344,6 +348,24 @@ namespace Menge {
 			 *	@returns	A reference to the goal set map.
 			 */
 			std::map< size_t, GoalSet * > & getGoalSets() { return _goalSets; }
+			/*!
+			 *	@brief		Returns a simulated laser scan.
+			 *
+			 *	@returns	A laser scan in the ROS sensor_msgs format.
+			 */
+			void computeRayScan( Agents::BaseAgent * agent, sensor_msgs::LaserScan& ls);
+			/*!
+			 *	@brief		Computes the distance from the obstacle in a particular direction.
+			 *
+			 *	@returns	Distance to the obstacles as a float variable
+			 */
+			float distanceFromObstacle(float angle, float range_max, Agents::BaseAgent * agent);
+
+			float distanceFromAgent(float angle, float range_max, Agents::BaseAgent * agent);
+			float nearAgentDistance(Vector2 start, Vector2 end);
+			float intersect(Vector2 start, Vector2 end, Vector2 circle, float radius);
+			bool in_between(Vector2 start, Vector2 point, Vector2 end);
+
 
 			friend FSM * buildFSM( FSMDescrip & fsmDescrip, Agents::SimulatorInterface * sim, bool VERBOSE );
 
@@ -366,9 +388,12 @@ namespace Menge {
 			 */
 			void addNodeHandle( ros::NodeHandle *nh){
 				_nh = nh;
-				_sub = _nh->subscribe("menge/cmd_vel", 1000, &Menge::BFSM::FSM::setPrefVelFromMsg, this);
-				_pub_crowd = _nh->advertise<geometry_msgs::PoseArray>("menge/crowd_pose", 50);
-				_pub_pose = _nh->advertise<geometry_msgs::Pose>("menge/robot_pose", 50);
+				_sub = _nh->subscribe("cmd_vel", 1000, &Menge::BFSM::FSM::setPrefVelFromMsg, this);
+				_pub_crowd = _nh->advertise<geometry_msgs::PoseArray>("crowd_pose", 50);
+				//_pub_odom = _nh->advertise<nav_msgs::Odometry>("odom", 50);
+				_pub_pose = _nh->advertise<geometry_msgs::PoseStamped>("pose", 50);
+				_pub_scan = _nh->advertise<sensor_msgs::LaserScan>("base_scan", 50);
+				_pub_endpoints = _nh->advertise<geometry_msgs::PoseArray>("laser_end", 50);
 			}
 			/*!
 			 *	@brief		return ROS node handle
@@ -376,6 +401,8 @@ namespace Menge {
 			 *	@param		void		
 			 */
 			ros::NodeHandle* getNodeHandle(){return _nh;}
+
+			void transformToEndpoints(Vector2 pos, float angle, sensor_msgs::LaserScan ls);
 
 		protected:
 			/*!
@@ -421,6 +448,9 @@ namespace Menge {
 			ros::Subscriber _sub;
 			ros::Publisher _pub_crowd;
 			ros::Publisher _pub_pose;
+			ros::Publisher _pub_odom;
+			ros::Publisher _pub_scan;
+			ros::Publisher _pub_endpoints;
 			Agents::PrefVelocity prefVelMsg;
 
 		};
