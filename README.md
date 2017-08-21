@@ -13,12 +13,11 @@ Installation Guidelines: (Tested For Ubuntu 14.04 with ROS Indigo)
 
 
 Configuration:
-To introduce a new robot agent into menge, update the specification file (tradeshowS.xml). Create a new AgentProfile and 
-replace  
-		<Common class="2" r="0.26" external="0"/>
-with 
-    <Common class="2" r="0.26" external="1"/>
-To ensure that the new agent is controlled externally, r=0.26 also specifies the radius of the robot. Currently set to Fetch robot. (http://docs.fetchrobotics.com/FetchAndFreight2016.pdf)
+
+1. To introduce a new robot agent into menge, update the specification file (tradeshowS.xml). Create a new AgentProfile and 
+replace  "<Common class="2" r="0.26" external="0"/>" with "<Common class="2" r="0.26" external="1"/>" to ensure that the new agent is controlled externally.
+2. The radius of the robot can be configures by varying r=0.26. Currently set to Fetch robot. (http://docs.fetchrobotics.com/FetchAndFreight2016.pdf)
+3. The laser range, the field of view and the number of scanners can be set by changing start_angle, end_angle, increment and range_max in FSM.cpp and recompiling the code.
 
 Examples:
 1. https://youtu.be/Q-qEu4oBmsw
