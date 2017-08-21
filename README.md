@@ -11,6 +11,15 @@ Installation Guidelines: (Tested For Ubuntu 14.04 with ROS Indigo)
 5. Press space to start the simulation, pressing space again will pause the simulation
 6. The robot in the simulator can be controlled externally using any controller than sends http://docs.ros.org/api/geometry_msgs/html/msg/Twist.html messages
 
+
+Configuration:
+To introduce a new robot agent into menge, update the specification file (tradeshowS.xml). Create a new AgentProfile and 
+replace  
+		<Common class="2" r="0.26" external="0"/>
+with 
+    <Common class="2" r="0.26" external="1"/>
+To ensure that the new agent is controlled externally, r=0.26 also specifies the radius of the robot. Currently set to Fetch robot. (http://docs.fetchrobotics.com/FetchAndFreight2016.pdf)
+
 Examples:
 1. https://youtu.be/Q-qEu4oBmsw
 
@@ -18,8 +27,8 @@ The video shows the tradeshow world in action with a single robot that is contro
 
 2. https://www.youtube.com/watch?v=zIs6h3l5YgU
 
-The video shows comparison of ORCA and Social forces model based collision avoidance.
+The video shows comparison of ORCA and Social forces model based collision avoidance. Other examples of different collision avoidance models for pedestrians can be found in http://gamma.cs.unc.edu/Menge/intro_vids.html
 
 3. https://www.youtube.com/watch?v=Ue1hHk6KlGg
 
-The video shows a use case of MengeROS where a robot (blue) in a simple office like environment with around (90) pedestrians learns a distribution of crowd over a grid using only local sensor observations. The left side shows the simulator, the right side shows the rviz visualization where the laser endpoints are in red. The dark regions of the grid indicate the likelihood of dense crowds. 
+The video shows a use case of MengeROS where a robot (blue) in a simple office like environment with around (90) pedestrians learns a distribution of crowd over a grid using only local sensor observations. The left side shows the simulator, the right side shows the rviz visualization where the laser endpoints are in red. The dark regions of the grid indicate the likelihood of dense crowds.
