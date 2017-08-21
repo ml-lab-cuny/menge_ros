@@ -18,6 +18,7 @@ Configuration:
 replace  \<Common class="2" r="0.26" external="0"/> with \<Common class="2" r="0.26" external="1" start_angle=-1.96 end_angle=1.918 increment=0.0005817 range_max=25/>. The "external" variables ensures that the new agent is controlled externally.
 2. The radius of the robot can be configures by varying r=0.26. 
 3. The laser range, the field of view and the number of scanners can be set by changing start_angle, end_angle, increment and range_max. Currently set to Fetch robot specifications. (http://docs.fetchrobotics.com/FetchAndFreight2016.pdf)
+4. All distances are in meters and angles in radians
 
 Examples:
 1. https://youtu.be/Q-qEu4oBmsw
