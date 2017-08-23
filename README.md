@@ -32,7 +32,7 @@ with
 ~~~
 \<Common class="2" r="0.26" external="1" start_angle="-1.96" end_angle="1.918" increment="0.0005817" range_max="25"/>. 
 ~~~
-The "external" variables ensures that the new agent is controlled externally. For more information on how to create an AgentProfile refer to the [Menge documentation](http://gamma.cs.unc.edu/Menge/files/mengeCDMain.pdf).
+The "external" variables ensure that the new agent is controlled externally. For more information on how to create an AgentProfile refer to the [Menge documentation](http://gamma.cs.unc.edu/Menge/files/mengeCDMain.pdf).
 
 2. The radius of the robot can be configured by varying r=0.26. 
 3. The laser range, the field of view and the number of ray traces can be set by changing `start_angle`, `end_angle`, `increment` and `range_max` ([See ROS documentation for more details](http://docs.ros.org/api/sensor_msgs/html/msg/LaserScan.html)). The configuration currently defaults to [Fetch robot specifications](http://docs.fetchrobotics.com/FetchAndFreight2016.pdf).
@@ -45,21 +45,20 @@ The "external" variables ensures that the new agent is controlled externally. Fo
 Here are several examples of MengeROS simulations.  
 1. This [video](https://youtu.be/Q-qEu4oBmsw) shows the tradeshow world in action with a single robot that is controlled by an [external controller](http://wiki.ros.org/teleop_twist_keyboard).
 
-2. This [video](https://www.youtube.com/watch?v=zIs6h3l5YgU) compares ORCA and the original social forces model (Helbing, Dirk, and Peter Molnar. "Social force model for pedestrian dynamics." Physical review E 51.5 (1995): 4282.). Other examples of different collision avoidance models for pedestrians can be found [here](http://gamma.cs.unc.edu/Menge/intro_vids.html).
+2. This [video](https://www.youtube.com/watch?v=zIs6h3l5YgU) compares ORCA and the original social forces model (Helbing, Dirk, and Peter Molnar. "Social Force Model for Pedestrian Dynamics." Physical Review E 51.5 (1995): 4282.). Other examples of different collision avoidance models for pedestrians can be found [here](http://gamma.cs.unc.edu/Menge/intro_vids.html).
 
-3. This [video](https://www.youtube.com/watch?v=Ue1hHk6KlGg) shows an application of MengeROS for crowd-sensitive path planning. In the video, a robot (blue) navigates through a simple office-like environment around 90 pedestrians. The robot learns a distribution of the crowd using only local sensor observations. The left side shows the simulator, the right side shows the rviz visualization where the laser endpoints are in red. The dark regions of the grid indicate the likelihood of dense crowds.
+3. This [video](https://www.youtube.com/watch?v=Ue1hHk6KlGg) shows an application of MengeROS for crowd-sensitive path planning. In the video, a robot (blue) navigates through a simple office-like environment around 90 pedestrians. The robot learns a distribution of the crowd using only local sensor observations. The left side shows the simulator; the right side shows the rviz visualization where the laser endpoints are in red. The dark regions of the grid indicate the likelihood of dense crowds.
 
 ## Reference paper
-A paper describing MengeROS can be downloaded [here](http://www.cs.hunter.cuny.edu/~epstein/html/publications.html). If you're going to use this library for your work, please cite it within any resulting publication:
+A paper describing MengeROS can be downloaded [here](http://www.cs.hunter.cuny.edu/~epstein/html/publications.html). If you are going to use this library for your work, please cite it within any resulting publication:
 
 A. Aroor, S.L. Epstein, R. Korpan "MengeROS: a Crowd Simulation Tool for Autonomous Robot Navigation", AAAI 2017 Fall Symposium on Artificial Intelligence for Human-Robot Interaction, 2017.
-
 
 The bibtex code for including this citation is provided:
 ~~~
 @INPROCEEDINGS{aroor2017,
   AUTHOR={Aroor, Anoop  and  Epstein, Susan L  and  Korpan, Raj},
-  TITLE={MengeROS: a Crowd Simulation Tool for Autonomous Robot Navigation},
+  TITLE={MengeROS: A Crowd Simulation Tool for Autonomous Robot Navigation},
   BOOKTITLE={AAAI 2017 Fall Symposium on Artificial Intelligence for Human-Robot Interaction},
   YEAR={2017}}
 ~~~
@@ -70,4 +69,4 @@ The Graduate Center of The City University of New York
 aaroor@gradcenter.cuny.edu
 
 ## Acknowledgments
-The development of MengeROS was supported by the Machine Learning and Problem Solving Lab at Hunter College, CUNY and supported in part by NSF Grant #1625843.
+The development of MengeROS was supported in part by NSF Grant #1625843 and by the Machine Learning and Problem Solving Lab at Hunter College, CUNY.
