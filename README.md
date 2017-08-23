@@ -18,12 +18,12 @@ MengeROS is a novel open-source crowd simulation tool for robot navigation that 
 ~~~
 rosrun menge_sim menge_sim -p examples\core\tradeshow.xml
 ~~~
-4. The previous command should start the simulator with the tradeshow world with as many robots as specified in the `examples\core\tradeshow\tradeshowS.xml`, the sample world files can be found on the Menge website or in examples.tar.gz in this repository.
+4. The previous command should start the simulator with the tradeshow world and as many robots as specified in the `examples\core\tradeshow\tradeshowS.xml`. The various sample environments files included in MengeROS can be found in examples.tar.gz in this repository.
 5. Press space to start the simulation; pressing space again will pause the simulation.
 6. The robot in the simulator can be controlled externally using any controller than sends [Twist](http://docs.ros.org/api/geometry_msgs/html/msg/Twist.html) messages.
 
 ## Robot Configuration:
-1. To introduce a new robot agent into menge, update the specification file (`tradeshowS.xml`). Create a new `AgentProfile` and 
+1. To introduce a new robot agent into MengeROS, update the specification file (`tradeshowS.xml`). Create a new `AgentProfile` and 
 replace
 ~~~
 \<Common class="2" r="0.26" external="0"/> 
@@ -45,7 +45,7 @@ The "external" variables ensures that the new agent is controlled externally. Fo
 Here are several examples of MengeROS simulations.  
 1. This [video](https://youtu.be/Q-qEu4oBmsw) shows the tradeshow world in action with a single robot that is controlled by an [external controller](http://wiki.ros.org/teleop_twist_keyboard).
 
-2. This [video](https://www.youtube.com/watch?v=zIs6h3l5YgU) compares ORCA and the original social forces model (). Other examples of different collision avoidance models for pedestrians can be found [here](http://gamma.cs.unc.edu/Menge/intro_vids.html).
+2. This [video](https://www.youtube.com/watch?v=zIs6h3l5YgU) compares ORCA and the original social forces model (Helbing, Dirk, and Peter Molnar. "Social force model for pedestrian dynamics." Physical review E 51.5 (1995): 4282.). Other examples of different collision avoidance models for pedestrians can be found [here](http://gamma.cs.unc.edu/Menge/intro_vids.html).
 
 3. This [video](https://www.youtube.com/watch?v=Ue1hHk6KlGg) shows an application of MengeROS for crowd-sensitive path planning. In the video, a robot (blue) navigates through a simple office-like environment around 90 pedestrians. The robot learns a distribution of the crowd using only local sensor observations. The left side shows the simulator, the right side shows the rviz visualization where the laser endpoints are in red. The dark regions of the grid indicate the likelihood of dense crowds.
 
