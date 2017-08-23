@@ -30,7 +30,7 @@ replace
 ~~~
 with 
 ~~~
-\<Common class="2" r="0.26" external="1" start_angle=-1.96 end_angle=1.918 increment=0.0005817 range_max=25/>. 
+\<Common class="2" r="0.26" external="1" start_angle="-1.96" end_angle="1.918" increment="0.0005817" range_max="25"/>. 
 ~~~
 The "external" variables ensures that the new agent is controlled externally. For more information on how to create an AgentProfile refer to [Menge documentation](http://gamma.cs.unc.edu/Menge/files/mengeCDMain.pdf).
 
