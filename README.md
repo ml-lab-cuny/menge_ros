@@ -1,5 +1,5 @@
 # menge_ros
-MengeROS is a novel open-source crowd simulation tool for robot navigation that integrates Menge (http://gamma.cs.unc.edu/Menge/) with ROS. It extends Menge to introduce one or more robot agents into a crowd of pedestrians. Each robot agent is controlled by external ROS-compatible controllers. MengeROS has been used to simulate crowds with up to 1000 pedestrians and 20 robots.
+MengeROS is a novel open-source crowd simulation tool for robot navigation that integrates [Menge](http://gamma.cs.unc.edu/Menge/) with ROS. It extends Menge to introduce one or more robot agents into a crowd of pedestrians. Each robot agent is controlled by external ROS-compatible controllers. MengeROS has been used to simulate crowds with up to 1000 pedestrians and 20 robots.
 
 ##  Contents
 * **[Installation](#installation)**
