@@ -1,38 +1,69 @@
 # menge_ros
-Crowd simulation tool for robot navigation based on Menge(http://gamma.cs.unc.edu/Menge/) and ROS.
-It extends Menge to introduce a robot agent into the crowd and which can be controller by external ROS compatible controllers. In other worlds now menge becomes a combined simulator for both crowd and robots.
+MengeROS is a novel open-source crowd simulation tool for robot navigation that integrates Menge (http://gamma.cs.unc.edu/Menge/) with ROS. It extends Menge to introduce one or more robot agents into a crowd of pedestrians. Each robot agent is controlled by external ROS-compatible controllers. MengeROS has been used to simulate crowds with up to 1000 pedestrians and 20 robots.
 
-Installation Guidelines: (Tested For Ubuntu 14.04 with ROS Indigo)
+##  Contents
+* **[Installation](#installation)**
+* **[Robot Configuration](#robot-configuration)**
+* **[Crowd Configuration](#crowd-configuration)**
+* **[Examples](#examples)**
+* **[Reference Paper](#reference-paper)**
+* **[Contact](#contact)**
+* **[Acknowledgments](#acknowledgments)**
 
+## Installation
+(Tested For Ubuntu 14.04 with ROS Indigo)
 1. Download the source code into the catkin workspace of ROS.
-2. Use catkin\_make to recompile the ROS packages. Start roscore.
-3. RUN the simulator using the command rosrun menge\_sim menge\_sim -p examples\core\tradeshow.xml
-4. The previous command should start the simulator with tradeshow world with as many robots as specified in the examples\core\tradeshow\tradeshowS.xml, the sample world files can be found the menge website or in examples.tar.gz in this repository.
-5. Press space to start the simulation, pressing space again will pause the simulation
-6. The robot in the simulator can be controlled externally using any controller than sends http://docs.ros.org/api/geometry_msgs/html/msg/Twist.html messages
+2. Use `catkin_make` to recompile the ROS packages and then start roscore.
+3. Run the simulator using the command:
+~~~
+rosrun menge\_sim menge\_sim -p examples\core\tradeshow.xml
+~~~
+4. The previous command should start the simulator with tradeshow world with as many robots as specified in the `examples\core\tradeshow\tradeshowS.xml`, the sample world files can be found the menge website or in examples.tar.gz in this repository.
+5. Press space to start the simulation, pressing space again will pause the simulation.
+6. The robot in the simulator can be controlled externally using any controller than sends [Twist](http://docs.ros.org/api/geometry_msgs/html/msg/Twist.html) messages.
 
+## Robot Configuration:
+1. To introduce a new robot agent into menge, update the specification file (`tradeshowS.xml`). Create a new `AgentProfile` and 
+replace
+~~~
+\<Common class="2" r="0.26" external="0"/> with \<Common class="2" r="0.26" external="1" start_angle=-1.96 end_angle=1.918 increment=0.0005817 range_max=25/>. 
+~~~
+The "external" variables ensures that the new agent is controlled externally. 
 
-Robot Configuration:
-
-1. To introduce a new robot agent into menge, update the specification file (tradeshowS.xml). Create a new AgentProfile and 
-replace  \<Common class="2" r="0.26" external="0"/> with \<Common class="2" r="0.26" external="1" start_angle=-1.96 end_angle=1.918 increment=0.0005817 range_max=25/>. The "external" variables ensures that the new agent is controlled externally.
 2. The radius of the robot can be configures by varying r=0.26. 
-3. The laser range, the field of view and the number of scanners can be set by changing start_angle, end_angle, increment and range_max (http://docs.ros.org/api/sensor_msgs/html/msg/LaserScan.html) Currently defaults to Fetch robot specifications. (http://docs.fetchrobotics.com/FetchAndFreight2016.pdf)
-4. All distances are in meters and angles in radians
+3. The laser range, the field of view and the number of scanners can be set by changing `start_angle`, `end_angle`, `increment` and `range_max` ([ROS documentation for more details](http://docs.ros.org/api/sensor_msgs/html/msg/LaserScan.html)). The configuration currently defaults to [Fetch robot specifications](http://docs.fetchrobotics.com/FetchAndFreight2016.pdf).
+4. All distances are in meters and angles in radians.
 
-Crowd Configuration:
+## Crowd Configuration:
+1. The integration allows all menge crowd configurations to be generated in MengeROS with no additional changes. The documentation on how to generate various crowd scenarios are given on the [Menge website](http://gamma.cs.unc.edu/Menge/docs/code/menge/html/).
 
-1. The integration allows all menge crowd configurations to be generated in mengeros with no additional changes. The documentation on how to generate various crowd scenarios are given in menge website. (http://gamma.cs.unc.edu/Menge/docs/code/menge/html/)
+## Examples:
+Here are several examples of MengeROS simulations.  
+1. This [video](https://youtu.be/Q-qEu4oBmsw) shows the tradeshow world in action with a single robot that is controlled by an [external controller](http://wiki.ros.org/teleop_twist_keyboard): 
 
-Examples:
-1. https://youtu.be/Q-qEu4oBmsw
+2. This [video](https://www.youtube.com/watch?v=zIs6h3l5YgU) shows comparison of ORCA and Social forces model based collision avoidance. Other examples of different collision avoidance models for pedestrians can be found [here](http://gamma.cs.unc.edu/Menge/intro_vids.html).
 
-The video shows the tradeshow world in action with a single robot that is controlled by a external controller (http://wiki.ros.org/teleop_twist_keyboard)
+3. This [video](https://www.youtube.com/watch?v=Ue1hHk6KlGg) shows an application of MengeROS for crowd-sensitive path planning. In the video, a robot (blue) navigates through a simple office-like environment around 90 pedestrians. The robot learns a distribution of the crowd using only local sensor observations. The left side shows the simulator, the right side shows the rviz visualization where the laser endpoints are in red. The dark regions of the grid indicate the likelihood of dense crowds.
 
-2. https://www.youtube.com/watch?v=zIs6h3l5YgU
+## Reference paper
+A paper describing MengeROS can be downloaded [here](http://www.cs.hunter.cuny.edu/~epstein/html/publications.html). If you're going to use this library for your work, please quote it within any resulting publication:
+~~~
+A. Aroor, S.L. Epstein, R. Korpan "MengeROS: a Crowd Simulation Tool for Autonomous Robot Navigation", AAAI 2017 Fall Symposium on Artificial Intelligence for Human-Robot Interaction, 2017.
+~~~
 
-The video shows comparison of ORCA and Social forces model based collision avoidance. Other examples of different collision avoidance models for pedestrians can be found in http://gamma.cs.unc.edu/Menge/intro_vids.html
+The bibtex code for including this citation is provided:
+~~~
+@INPROCEEDINGS{aroor2017,
+  AUTHOR={Aroor, Anoop  and  Epstein, Susan L  and  Korpan, Raj},
+  TITLE={MengeROS: a Crowd Simulation Tool for Autonomous Robot Navigation},
+  BOOKTITLE={AAAI 2017 Fall Symposium on Artificial Intelligence for Human-Robot Interaction},
+  YEAR={2017}}
+~~~
 
-3. https://www.youtube.com/watch?v=Ue1hHk6KlGg
+## Contact
+Anoop Aroor
+The Graduate Center of The City University of New York
+aaroor@gradcenter.cuny.edu
 
-The video shows a use case of MengeROS where a robot (blue) in a simple office like environment with around (90) pedestrians learns a distribution of crowd over a grid using only local sensor observations. The left side shows the simulator, the right side shows the rviz visualization where the laser endpoints are in red. The dark regions of the grid indicate the likelihood of dense crowds.
+## Acknowledgments
+The development of MengeROS is supported by the Machine Learning and Problem Solving Lab at Hunter College, CUNY.
