@@ -16,7 +16,7 @@ MengeROS is a novel open-source crowd simulation tool for robot navigation that 
 2. Use `catkin_make` to recompile the ROS packages and then start roscore.
 3. Run the simulator using the command:
 ~~~
-rosrun menge\_sim menge\_sim -p examples\core\tradeshow.xml
+rosrun menge_sim menge_sim -p examples\core\tradeshow.xml
 ~~~
 4. The previous command should start the simulator with tradeshow world with as many robots as specified in the `examples\core\tradeshow\tradeshowS.xml`, the sample world files can be found the menge website or in examples.tar.gz in this repository.
 5. Press space to start the simulation, pressing space again will pause the simulation.
@@ -26,12 +26,16 @@ rosrun menge\_sim menge\_sim -p examples\core\tradeshow.xml
 1. To introduce a new robot agent into menge, update the specification file (`tradeshowS.xml`). Create a new `AgentProfile` and 
 replace
 ~~~
-\<Common class="2" r="0.26" external="0"/> with \<Common class="2" r="0.26" external="1" start_angle=-1.96 end_angle=1.918 increment=0.0005817 range_max=25/>. 
+\<Common class="2" r="0.26" external="0"/> 
 ~~~
-The "external" variables ensures that the new agent is controlled externally. 
+with 
+~~~
+\<Common class="2" r="0.26" external="1" start_angle=-1.96 end_angle=1.918 increment=0.0005817 range_max=25/>. 
+~~~
+The "external" variables ensures that the new agent is controlled externally. For more information on how to create an AgentProfile refer to [Menge documentation](http://gamma.cs.unc.edu/Menge/files/mengeCDMain.pdf).
 
-2. The radius of the robot can be configures by varying r=0.26. 
-3. The laser range, the field of view and the number of scanners can be set by changing `start_angle`, `end_angle`, `increment` and `range_max` ([ROS documentation for more details](http://docs.ros.org/api/sensor_msgs/html/msg/LaserScan.html)). The configuration currently defaults to [Fetch robot specifications](http://docs.fetchrobotics.com/FetchAndFreight2016.pdf).
+2. The radius of the robot can be configured by varying r=0.26. 
+3. The laser range, the field of view and the number of ray traces can be set by changing `start_angle`, `end_angle`, `increment` and `range_max` ([ROS documentation for more details](http://docs.ros.org/api/sensor_msgs/html/msg/LaserScan.html)). The configuration currently defaults to [Fetch robot specifications](http://docs.fetchrobotics.com/FetchAndFreight2016.pdf).
 4. All distances are in meters and angles in radians.
 
 ## Crowd Configuration:
@@ -39,7 +43,7 @@ The "external" variables ensures that the new agent is controlled externally.
 
 ## Examples:
 Here are several examples of MengeROS simulations.  
-1. This [video](https://youtu.be/Q-qEu4oBmsw) shows the tradeshow world in action with a single robot that is controlled by an [external controller](http://wiki.ros.org/teleop_twist_keyboard): 
+1. This [video](https://youtu.be/Q-qEu4oBmsw) shows the tradeshow world in action with a single robot that is controlled by an [external controller](http://wiki.ros.org/teleop_twist_keyboard).
 
 2. This [video](https://www.youtube.com/watch?v=zIs6h3l5YgU) shows comparison of ORCA and Social forces model based collision avoidance. Other examples of different collision avoidance models for pedestrians can be found [here](http://gamma.cs.unc.edu/Menge/intro_vids.html).
 
