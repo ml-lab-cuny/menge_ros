@@ -18,7 +18,7 @@ MengeROS is a novel open-source crowd simulation tool for robot navigation that 
 ~~~
 rosrun menge_sim menge_sim -p examples\core\tradeshow.xml
 ~~~
-4. The previous command should start the simulator with the tradeshow world and as many robots as specified in the `examples\core\tradeshow\tradeshowS.xml`. The various sample environments files included in MengeROS can be found in examples.tar.gz in this repository.
+4. The previous command should start the simulator with the tradeshow world and as many robots as specified in the `examples\core\tradeshow\tradeshowS.xml`. The various sample environments files included in MengeROS can be found in the examples folder in this repository.
 5. Press space to start the simulation; pressing space again will pause the simulation.
 6. The robot in the simulator can be controlled externally using any controller than sends [Twist](http://docs.ros.org/api/geometry_msgs/html/msg/Twist.html) messages.
 
