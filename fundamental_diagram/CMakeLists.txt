@@ -69,7 +69,7 @@ add_library(fundamental_diagram
 ## Specify libraries to link a library or executable target against
 
 
-target_link_libraries (fundamental_diagram menge)
+target_link_libraries (fundamental_diagram ${catkin_LIBRARIES})
 
 
 

@@ -69,7 +69,7 @@ add_library(agt_helbing
 ## Specify libraries to link a library or executable target against
 
 
-target_link_libraries (agt_helbing menge)
+target_link_libraries (agt_helbing ${catkin_LIBRARIES})
 
 
 

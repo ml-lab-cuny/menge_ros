@@ -69,7 +69,7 @@ add_library(terrain
 ## Specify libraries to link a library or executable target against
 
 
-target_link_libraries (terrain menge)
+target_link_libraries (terrain ${catkin_LIBRARIES})
 
 
 

@@ -69,7 +69,7 @@ add_library(agt_zanlungo
 ## Specify libraries to link a library or executable target against
 
 
-target_link_libraries (agt_zanlungo menge)
+target_link_libraries (agt_zanlungo ${catkin_LIBRARIES})
 
 
 

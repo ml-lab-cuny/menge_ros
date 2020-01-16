@@ -69,7 +69,7 @@ add_library(agt_karamouzas
 ## Specify libraries to link a library or executable target against
 
 
-target_link_libraries (agt_karamouzas menge)
+target_link_libraries (agt_karamouzas ${catkin_LIBRARIES})
 
 
 

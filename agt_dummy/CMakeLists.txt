@@ -69,7 +69,7 @@ add_library(agt_dummy
 ## Specify libraries to link a library or executable target against
 
 
-target_link_libraries (agt_dummy menge)
+target_link_libraries (agt_dummy ${catkin_LIBRARIES})
 
 
 

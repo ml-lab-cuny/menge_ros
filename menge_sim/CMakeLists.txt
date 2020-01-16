@@ -88,7 +88,7 @@ add_executable(
 	${source_files}
 )
 
-target_link_libraries (menge_sim menge ${catkin_LIBRARIES})
+target_link_libraries (menge_sim ${catkin_LIBRARIES})
 
 file( 
   GLOB

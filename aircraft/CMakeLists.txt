@@ -69,7 +69,7 @@ add_library(aircraft
 ## Specify libraries to link a library or executable target against
 
 
-target_link_libraries (aircraft menge)
+target_link_libraries (aircraft ${catkin_LIBRARIES})
 
 
 

@@ -69,7 +69,7 @@ add_library(formations
 ## Specify libraries to link a library or executable target against
 
 
-target_link_libraries (formations menge)
+target_link_libraries (formations ${catkin_LIBRARIES})
 
 
 

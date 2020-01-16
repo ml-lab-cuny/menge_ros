@@ -69,7 +69,7 @@ add_library(agt_johansson
 ## Specify libraries to link a library or executable target against
 
 
-target_link_libraries (agt_johansson menge)
+target_link_libraries (agt_johansson ${catkin_LIBRARIES})
 
 
 
