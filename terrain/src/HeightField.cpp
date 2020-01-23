@@ -85,7 +85,7 @@ namespace Terrain {
 		Image *img = loadImage( imgName );
 		if ( img == 0x0 ) {
 			logger << Logger::ERR_MSG << "Unable to load height field image " << imgName << ".";
-			return false;
+			return 0x0;
 		}
 
 		_W = img->data()->getWidth();
@@ -127,18 +127,18 @@ namespace Terrain {
 		if ( !loadOkay ) {	// load xml file
 			logger << Logger::ERR_MSG << "Could not load height field configuration xml (" << fileName << ") due to xml syntax errors.\n";
 			logger << "\t" << xml.ErrorDesc();
-			return false;
+			return 0x0;
 		}
 
 		TiXmlElement* rootNode = xml.RootElement();	
 		if( ! rootNode ) {
 			logger << Logger::ERR_MSG << "Height field configuration (" << fileName << ") does not contain a root element.";
-			return false;
+			return 0x0;
 		}
 
 		if( rootNode->ValueStr () != "HeightField" ) {
 			logger << Logger::ERR_MSG << "Height field configuration (" << fileName << ")'s root element is not \"HeightField\".";
-			return false;
+			return 0x0;
 		}
 
 		std::string absPath;
