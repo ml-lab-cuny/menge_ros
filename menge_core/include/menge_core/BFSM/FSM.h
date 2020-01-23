@@ -390,6 +390,7 @@ namespace Menge {
 				_nh = nh;
 				_sub = _nh->subscribe("cmd_vel", 1000, &Menge::BFSM::FSM::setPrefVelFromMsg, this);
 				_pub_crowd = _nh->advertise<geometry_msgs::PoseArray>("crowd_pose", 50);
+				_pub_crowd_all = _nh->advertise<geometry_msgs::PoseArray>("crowd_pose_all", 50);
 				//_pub_odom = _nh->advertise<nav_msgs::Odometry>("odom", 50);
 				_pub_pose = _nh->advertise<geometry_msgs::PoseStamped>("pose", 50);
 				_pub_scan = _nh->advertise<sensor_msgs::LaserScan>("base_scan", 50);
@@ -445,14 +446,15 @@ namespace Menge {
 			 *	@brief		ROS node handle
 			 */			
 			ros::NodeHandle *_nh;
-			ros::Subscriber _sub;
+	                ros::Subscriber _sub;
 			ros::Publisher _pub_crowd;
+			ros::Publisher _pub_crowd_all;
 			ros::Publisher _pub_pose;
 			ros::Publisher _pub_odom;
 			ros::Publisher _pub_scan;
 			ros::Publisher _pub_endpoints;
 			Agents::PrefVelocity prefVelMsg;
-
+			std::vector< size_t > _robotIDList;
 		};
 
 		/////////////////////////////////////////////////////////////////////

@@ -85,32 +85,37 @@ namespace Menge {
 		bool isVisible = false;
 		// TODO: Should I compute this blindly?  Although it is used in potentially three places
 		//		mostly, it won't be used.
+		double radius = agent->_radius;
 		Vector2 target = _goal->getTargetPoint( agent->_pos, agent->_radius );
 		if ( _targetID < _wayPointCount ) {
-			isVisible = Menge::SPATIAL_QUERY->queryVisibility( agent->_pos, _wayPoints[ _targetID ], agent->_radius );
+			isVisible = Menge::SPATIAL_QUERY->queryVisibility( agent->_pos, _wayPoints[ _targetID ], radius );
 		} else {
-			isVisible = Menge::SPATIAL_QUERY->queryVisibility( agent->_pos, target, agent->_radius );
+			isVisible = Menge::SPATIAL_QUERY->queryVisibility( agent->_pos, target, radius );
 		}
 		size_t testID = _targetID + 1;
-		while ( testID < _wayPointCount && Menge::SPATIAL_QUERY->queryVisibility( agent->_pos, _wayPoints[ testID ], agent->_radius ) ) {
+		double distance = agent->_pos.distance(_wayPoints[ testID ]);
+		while ( testID < _wayPointCount && (Menge::SPATIAL_QUERY->queryVisibility( agent->_pos, _wayPoints[ testID ], radius )) && distance <= 3 ) {
+			distance = agent->_pos.distance(_wayPoints[ testID ]);
 			_targetID = testID;
 			isVisible = true;
 			++testID;
 		}
 		if ( _targetID == _wayPointCount - 1 ) {
-			if ( Menge::SPATIAL_QUERY->queryVisibility( agent->_pos, target, agent->_radius ) ) {
+			if ( Menge::SPATIAL_QUERY->queryVisibility( agent->_pos, target, radius ) ) {
 				++_targetID;
 				isVisible = true;
 			}
 		}
 		// Visibility test
 		Vector2 dir;
-		if ( isVisible ) {
+		//std::cout << "Is visible : " << isVisible << std::endl;
+		if ( isVisible ) { 
 			Vector2 curr( _targetID < _wayPointCount ? _wayPoints[ _targetID ] : target );
 			dir = norm( curr - agent->_pos );
 			_validPos = agent->_pos;
-			pVel.setTarget( curr );
+			pVel.setTarget(curr);	
 		} else {
+			
 			// This should never be the zero vector.
 			//	_validPos is set when the current waypoint is visible
 			//  this code is only achieved when it is NOT visible
@@ -118,8 +123,8 @@ namespace Menge {
 			//		that breaks the earlier assertion.
 			dir = norm( _validPos - agent->_pos );
 			pVel.setTarget( _validPos );
-		}
-		pVel.setSingle( dir );
+		} 
+		pVel.setSingle(dir);
 	}
 
 	/////////////////////////////////////////////////////////////////////

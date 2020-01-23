@@ -3,7 +3,7 @@
 License
 
 Menge
-Copyright © and trademark ™ 2012-14 University of North Carolina at Chapel Hill. 
+Copyright ï¿½ and trademark ï¿½ 2012-14 University of North Carolina at Chapel Hill. 
 All rights reserved.
 
 Permission to use, copy, modify, and distribute this software and its documentation 
@@ -90,12 +90,12 @@ SimulatorDB simDB;
 
 void velCallback(const geometry_msgs::Twist& msg)
 {
-   ROS_INFO("I heard: x :[%f]", msg.linear.x);
-   ROS_INFO("I heard: y :[%f]", msg.linear.y);
-   ROS_INFO("I heard: z :[%f]", msg.linear.z);
-   ROS_INFO("I heard: x :[%f]", msg.angular.x);
-   ROS_INFO("I heard: y :[%f]", msg.angular.y);
-   ROS_INFO("I heard: z :[%f]", msg.angular.z);
+   //ROS_INFO("I heard: x :[%f]", msg.linear.x);
+   //ROS_INFO("I heard: y :[%f]", msg.linear.y);
+   //ROS_INFO("I heard: z :[%f]", msg.linear.z);
+   //ROS_INFO("I heard: x :[%f]", msg.angular.x);
+   //ROS_INFO("I heard: y :[%f]", msg.angular.y);
+   //ROS_INFO("I heard: z :[%f]", msg.angular.z);
 }
 
 
@@ -163,9 +163,11 @@ int simMain( SimulatorDBEntry * dbEntry, const std::string & behaveFile, const s
 #endif
 		if ( !view.initViewer( viewTitle ) ) {
 			std::cerr << "Unable to initialize the viewer\n\n";
+			ROS_INFO_STREAM("Unable to initialize the viewer");
 			visualize = false;
 		} else {
 			view.setScene( scene );
+			ROS_INFO_STREAM("Setting the vizualizer");
 			view.setFixedStep( TIME_STEP );
 			view.setBGColor( 0.1f, 0.1f, 0.1f );
 			dbEntry->populateScene( system, scene );
@@ -180,6 +182,7 @@ int simMain( SimulatorDBEntry * dbEntry, const std::string & behaveFile, const s
 			logger << Logger::INFO_MSG << "Simulation time: " << dbEntry->simDuration() << "\n";
 		}
 	} else  {
+		ROS_INFO_STREAM(" No visualization ");
 		logger << Logger::INFO_MSG << "NO VISUALIZATION!\n";
 		Vis::NullViewer view;	// need the call back
 		view.setScene( scene );
@@ -199,26 +202,33 @@ int main(int argc, char* argv[]) {
 
 	ros::init(argc,argv,"menge_sim");
 	ros::NodeHandle nh;
-	ROS_INFO_STREAM("Hello_semaFORR");
-	//std::string project_path;
-        //nh.getParam("project", project_path);
 
-	//std::string projectSpecFile;
-	//bool ok = ros::param::get("/menge_sim/menge_world",projectSpecFile);
-        //if(!ok){
-	//	ROS_INFO("Could not get menge project spec file");
-	//	exit(1);
-     	//}
-
+	//ROS_INFO_STREAM(" argument count " << argc << "," << argv[0] << "," << argv[1] << "," << argv[2]);
+	/*
+	std::string map_xml;
+	bool ok = nh.getParam("_map_xml",map_xml);
+        if(!ok){
+		ROS_INFO_STREAM("Could not get menge project spec file" << map_xml);
+		exit(1);
+     	}
+	*/
+	
+	
 	logger.setFile( "log.html" );
 	logger << Logger::INFO_MSG << "initialized logger";
+	//argc = 3;
 
-	//ROS_INFO_STREAM(" argument count " << argc << "," << argv[0] << "," << argv[1] << "," << argv[2] << ":"<< project_path);
+	//argv[1] = "-p";		
+	//char *cstr = new char[map_xml.length() + 1];
+	//strcpy(cstr, map_xml.c_str());
+	//argv[2] = cstr;	
+
+	ROS_INFO_STREAM(" argument count " << argc << "," << argv[0] << "," << argv[1] << "," << argv[2]);
 
 	std::string exePath( argv[0] );
-	//std::string exePath = projectSpecFile;
 	std::string absExePath;
 	os::path::absPath( exePath, absExePath );
+
 	std::string tail;
 	os::path::split( absExePath, ROOT, tail );
 	PluginEngine plugins( &simDB );
@@ -233,7 +243,7 @@ int main(int argc, char* argv[]) {
 #endif	// _WIN32
 	logger.line();
 	logger << Logger::INFO_MSG << "Plugin path: " << pluginPath;
-	pluginPath = "/home/anooparoor/catkin_ws/devel/lib";
+	pluginPath = "~/catkin_simulator/devel/lib";
 	plugins.loadPlugins( pluginPath );
 	if ( simDB.modelCount() == 0 ) {
 		logger << Logger::INFO_MSG << "There were no pedestrian models in the plugins folder\n";
@@ -244,10 +254,12 @@ int main(int argc, char* argv[]) {
 	ProjectSpec projSpec;
 
 	if (! projSpec.parseCommandParameters( argc, argv, &simDB ) ) {
+		ROS_INFO_STREAM(" parse command parameter ");
 		return 0;
 	}	
 
 	if ( !projSpec.fullySpecified() ) {
+		ROS_INFO_STREAM(" useviz ");
 		return 1;
 	}
 
@@ -258,6 +270,7 @@ int main(int argc, char* argv[]) {
 	std::string dumpPath = projSpec.getDumpPath();
 	setDefaultGeneratorSeed( projSpec.getRandomSeed() );
 	std::string outFile = projSpec.getOutputName();
+	ROS_INFO_STREAM(" useviz ");
 
 	std::string viewCfgFile = projSpec.getView();
 	bool useVis = viewCfgFile != "";
@@ -266,9 +279,12 @@ int main(int argc, char* argv[]) {
 	SimulatorDBEntry * simDBEntry = simDB.getDBEntry( model );
 	if ( simDBEntry == 0x0 ) {
 		std::cerr << "!!!  The specified model is not recognized: " << model << "\n";
+		ROS_INFO_STREAM(" useviz ");
 		logger.close();
 		return 1;
 	}
+
+	ROS_INFO_STREAM(" useviz "<< useVis);
 
 	int result = simMain( simDBEntry, projSpec.getBehavior(), projSpec.getScene(), projSpec.getOutputName(), projSpec.getSCBVersion(), useVis, viewCfgFile, dumpPath , &nh);
 

@@ -127,18 +127,18 @@ namespace Terrain {
 		if ( !loadOkay ) {	// load xml file
 			logger << Logger::ERR_MSG << "Could not load height field configuration xml (" << fileName << ") due to xml syntax errors.\n";
 			logger << "\t" << xml.ErrorDesc();
-			return 0x0;
+			return false;
 		}
 
 		TiXmlElement* rootNode = xml.RootElement();	
 		if( ! rootNode ) {
 			logger << Logger::ERR_MSG << "Height field configuration (" << fileName << ") does not contain a root element.";
-			return 0x0;
+			return false;
 		}
 
 		if( rootNode->ValueStr () != "HeightField" ) {
 			logger << Logger::ERR_MSG << "Height field configuration (" << fileName << ")'s root element is not \"HeightField\".";
-			return 0x0;
+			return false;
 		}
 
 		std::string absPath;

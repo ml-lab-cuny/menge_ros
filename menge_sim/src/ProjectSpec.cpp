@@ -54,7 +54,7 @@ ProjectSpec::ProjectSpec() : _projPath("."),
 							 _scbVersion("2.1"),
 							 _verbose(false),
 							 _viewConfig(""),
-							 _duration(40000.f),
+							 _duration(4000000000.f),
 							 _timeStep(-1.f),
 							 _seed(0),
 							 _imgDumpPath(".")

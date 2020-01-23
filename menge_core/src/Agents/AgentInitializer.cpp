@@ -62,7 +62,12 @@ namespace Menge {
 		const float PRIORITY = 0.f;					///< The default priority
 		const float MAX_ANGLE_VEL = TWOPI;			///< The default maximum angular velocity
 		const size_t OBSTACLE_SET = 0xFFFFFFFF;		///< The default obstacle set (all obstacles)
-		const int EXTERNAL = 0;				///< The default agent is internally controlled  
+		const int EXTERNAL = 0;				///< The default agent is internally controlled 
+		const float RANGE_MAX = 25.0f;
+		const float START_ANGLE = -1.96f;
+		const float END_ANGLE = 1.96f;
+		const float INCREMENT = 0.0005817f; 
+		const float ROBOT_ATTRACTION = 0.0f;
 
 		////////////////////////////////////////////////////////////////
 		
@@ -80,11 +85,17 @@ namespace Menge {
 			_neighborDist = new ConstFloatGenerator( NEIGHBOR_DIST );
 			_radius = new ConstFloatGenerator( RADIUS );
 			_maxAngVel = new ConstFloatGenerator( MAX_ANGLE_VEL );
+			
 			// single values
 			_obstacleSet = OBSTACLE_SET;
 			_priority = PRIORITY;
 			_class = CLASS;
 			_isExternal = EXTERNAL;
+			_start_angle = START_ANGLE;
+			_end_angle = END_ANGLE;
+			_increment = INCREMENT;
+			_range_max = RANGE_MAX;
+			_robot_attraction = ROBOT_ATTRACTION;
 		}
 
 		////////////////////////////////////////////////////////////////
@@ -198,6 +209,11 @@ namespace Menge {
 			agent->_priority = _priority;
 			agent->_class = _class;
 			agent->_isExternal = _isExternal;
+			agent->_range_max = _range_max;
+			agent->_increment = _increment;
+			agent->_start_angle = _start_angle;
+			agent->_end_angle = _end_angle;
+			agent->_robot_attraction = _robot_attraction;
 			
 			std::vector< BFSM::VelModifier * >::iterator vItr = _velModifiers.begin();
 			for ( ; vItr != _velModifiers.end(); ++vItr ) {
@@ -231,6 +247,14 @@ namespace Menge {
 				result = constIntGenerator( _maxNeighbors, value );
 			} else if ( paramName == "r" ) {
 				result = constFloatGenerator( _radius, value );
+			} else if ( paramName == "range_max" ) {
+				result = constFloat( _range_max, value );
+			} else if ( paramName == "start_angle" ) {
+				result = constFloat( _start_angle, value );
+			} else if ( paramName == "end_angle" ) {
+				result = constFloat( _end_angle, value );
+			} else if ( paramName == "increment" ) {
+				result = constFloat( _increment, value );
 			} else if ( paramName == "max_angle_vel" ) {
 				result = constFloatGenerator( _maxAngVel, value, DEG_TO_RAD );
 			} else if ( paramName == "obstacleSet" ) {
@@ -241,6 +265,8 @@ namespace Menge {
 				result = constFloat( _priority, value );
 			} else if ( paramName == "external" ) {
 				result = constSizet( _isExternal, value);
+			} else if ( paramName == "robot_attraction" ) {
+				result = constFloat( _robot_attraction, value);
 			}
 
 			if ( result == FAILURE ) {

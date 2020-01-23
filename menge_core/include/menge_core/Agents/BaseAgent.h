@@ -206,6 +206,13 @@ namespace Menge {
 			 *	@brief		The preferred speed of the agent
 			 */
 			float _prefSpeed;	
+			/*!
+			 *	@brief		The laser config of the robot agent
+			 */
+			float _range_max;
+			float _start_angle;
+			float _end_angle;
+			float _increment;	
 
 			/*!
 			 *	@brief		The current 2D position of the agent
@@ -302,6 +309,17 @@ namespace Menge {
 			 *	At a minimum, it is used to determine sideways clearance.
 			 */
 			float _radius;
+			/*!
+			 *	@brief		The agent's affinity to robots in the environment.  
+			 *
+			 *	If the agent is represented as a circle, then this is simply 
+			 *	the circle's radius.  If the agent is represented as an ellipse, 
+			 *	then this is the radius perpendicular to the orientation.
+			 *	Other geometries should provide their own interpretation.
+			 *
+			 *	At a minimum, it is used to determine sideways clearance.
+			 */
+			float _robot_attraction;
 
 			/*!
 			 *	@brief  a set of velocity modifiers to be set with the agent. Allows for intermediate velocity changes

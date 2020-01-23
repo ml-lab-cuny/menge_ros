@@ -137,6 +137,8 @@ namespace Menge {
 		 */
 		const GraphVertex * getVertex( size_t i ) const;
 
+		void publishPath(RoadMapPath *path);
+
 		/*!
 		 *	@brief		The unique label for this data type to be used with 
 		 *				resource management.
@@ -235,7 +237,7 @@ namespace Menge {
 		 *				no longer used for calculation.  First N booleans are "in heap", second
 		 *				N are "finished".  One block of 2N booleans per thread.
 		 */
-		bool *	_STATE;
+		bool *	_STATE;   
 	};
 
 	/*!

@@ -3,7 +3,7 @@
 License
 
 Menge
-Copyright © and trademark ™ 2012-14 University of North Carolina at Chapel Hill. 
+Copyright Â© and trademark â„¢ 2012-14 University of North Carolina at Chapel Hill. 
 All rights reserved.
 
 Permission to use, copy, modify, and distribute this software and its documentation 
@@ -60,6 +60,13 @@ namespace Menge {
 
 		FSM::FSM( Agents::SimulatorInterface * sim ):_sim(sim), _agtCount(0), _currNode(0x0) {	
 			setAgentCount( sim->getNumAgents() );
+			int agtCount = (int)this->_sim->getNumAgents();
+			for ( int a = 0; a < agtCount; ++a ) {
+				Agents::BaseAgent * agt = this->_sim->getAgent( a );
+				if(agt->_isExternal){
+					_robotIDList.push_back(agt->_id);		
+				}
+			}
 		}
 
 		/////////////////////////////////////////////////////////////////////
@@ -155,27 +162,58 @@ namespace Menge {
 		void FSM::computePrefVelocity( Agents::BaseAgent * agent ) {
 			const size_t ID = agent->_id;
 			// Evalute the new state's velocity
-
 						
 			//generate a preferred velocity for passing around
 			Agents::PrefVelocity newVel;
-
+	
 			_currNode[ ID ]->getPrefVelocity( agent, newVel);
 
 			//TODO: My velocity modifiers here
-			
-			
 
 			std::vector< VelModifier * >::iterator vItr = _velModifiers.begin();
 			for ( ; vItr != _velModifiers.end(); ++vItr ) {   //TODO: replace global vel mod initalizer
 				(*vItr)->adaptPrefVelocity(agent, newVel);
 			}
+
+			//compute robot effect on crowd
+			if(!agent->_isExternal and _robotIDList.size() == 1){
+				//std::cout << "Velocity of crowd agent " << ID << " : " << newVel.getPreferred()._x << " " << newVel.getPreferred()._y << std::endl;
+				Agents::BaseAgent *rbt = this->_sim->getAgent(_robotIDList[0]);
+				Vector2 agentRobot = rbt->_pos - agent->_pos;
+				double angleToRobot = atan2(agentRobot._y,agentRobot._x);
+				double agent_angle = atan2(agent->_orient._y,agent->_orient._x);
+				double requiredTurn = angleToRobot - agent_angle;
+				if(requiredTurn > M_PI)
+      					requiredTurn = requiredTurn - (2*M_PI);
+    				if(requiredTurn < -M_PI)
+      					requiredTurn = requiredTurn + (2*M_PI);
+
+				double distance = rbt->_pos.distance(agent->_pos);
+				double attraction = agent->_robot_attraction;
+				//std::cout << "Attraction " << attraction  << std::endl;
+				//std::cout << "Angle towards robot: " << angleToRobot << " Agent angle: " << agent_angle << " Turn: " << requiredTurn << std::endl;
+				//double actualTurn = requiredTurn * attraction / (distance + 1);
+				if(distance < 1 and attraction == 1){
+					newVel.turn(requiredTurn);
+				}
+				//else if(distance < 2 and attraction == -1){
+				//	requiredTurn = M_PI - requiredTurn;
+					//if(requiredTurn > M_PI)
+      					//	requiredTurn = requiredTurn - (2*M_PI);
+    					//if(requiredTurn < -M_PI)
+      					//	requiredTurn = requiredTurn + (2*M_PI);
+				//	newVel.turn1(requiredTurn);
+				//}
+			}
+
 			if(agent->_isExternal){
 				//std::cout << "External Agent detected : " << ID << std::endl;
 				prefVelMsg.setSpeed(0.0);
+				//std::cout << "Before spin "<< std::endl;
 				ros::spinOnce();
+				//std::cout << "After spin "<< std::endl;
 				newVel = prefVelMsg;
-				//std::cout << (newVel.getPreferred()).x() << " : " << (newVel.getPreferred()).y() << std::endl;
+				std::cout << (newVel.getPreferred()).x() << " : " << (newVel.getPreferred()).y() << std::endl;
 				//std::cout << "Direction Set from the ROS message!" << std::endl;
 			}
 
@@ -215,14 +253,16 @@ namespace Menge {
 			
 			Vector2 pos = agent->_pos;
 			//In radians to represent a 220 degree scan with 1/3 degree increment for a total of 660 ray scans
-			float start_angle = -1.91986; 
-			float end_angle = 1.918;
-			float increment = 0.005817;
-			float range_max = 25; 
+			float start_angle = agent->_start_angle; 
+			float end_angle = agent->_end_angle;
+			float increment = agent->_increment;
+			float range_max = agent->_range_max; 
 			//In meters 
-			/* 
+			float angles[660];			
+
 			for(int i = 0;i < 660;i++){
 				ls.ranges.push_back(0);
+				angles[i] = start_angle + (increment * i);
 			}
 
 			// parallel implementati
@@ -231,31 +271,12 @@ namespace Menge {
 			for(int i = 0; i < 660; i++){
 				//std::cout << "Generating obstacle distance " << angle; 
 				//for each angle compute the distance from the obstacle
-				float angle = start_angle + (increment * i);
-				float distance =  distanceFromObstacle(angle,range_max, agent);
-				float distance_agent = distanceFromAgent(angle, range_max, agent);
+				float distance =  distanceFromObstacle(angles[i],range_max, agent);
+				float distance_agent = distanceFromAgent(angles[i],range_max, agent);
 				if(distance > distance_agent){
 					distance = distance_agent;
 				}
 				ls.ranges[i] = distance;
-				//std::cout << " distance : " << distance << std::endl; 
-			}
-			ls.angle_min = start_angle;
-			ls.angle_max = end_angle;
-			ls.angle_increment = increment;
-			ls.range_max = range_max;
-			*/
-			// serial implementation
-			
-			for(float angle = start_angle; angle <= end_angle ; angle += increment){
-				//std::cout << "Generating obstacle distance " << angle; 
-				//for each angle compute the distance from the obstacle
-				float distance =  distanceFromObstacle(angle,range_max, agent);
-				float distance_agent = distanceFromAgent(angle, range_max, agent);
-				if(distance > distance_agent){
-					distance = distance_agent;
-				}
-				ls.ranges.push_back(distance);
 				//std::cout << " distance : " << distance << std::endl; 
 			}
 			ls.angle_min = start_angle;
@@ -285,8 +306,7 @@ namespace Menge {
 		float FSM::distanceFromObstacle(float angle, float range_max, Agents::BaseAgent * agent){
 			// find the vector to represent the ray 
 			float min_range = 0.01;
-			float width = 0.1;
-			
+			float width = 0.0001;			
 			float agent_dir_angle = atan2(agent->_orient._y, agent->_orient._x);
 			//std::cout << "Calculate laser:Agent orient x:" << agent->_orient._x << " y:" << agent->_orient._y << std::endl;
 			//std::cout << "Calculate Agent direction : " << agent_dir_angle << std::endl;
@@ -324,7 +344,7 @@ namespace Menge {
 				if(agt->_isExternal == false){
 					//the agent in question is a crowd agent
 					Vector2 agent_pos = agt->_pos;
-					float radius = agt->_radius * 1.1;
+					float radius = agt->_radius;
 					float current = intersect(start, end, agent_pos, radius);
 					if(current < distance) 
 						distance = current;				
@@ -481,10 +501,12 @@ namespace Menge {
 			ros::Time current_time;
   			current_time = ros::Time::now();
 			geometry_msgs::PoseArray crowd;
+			geometry_msgs::PoseArray crowd_all;
 			Vector2 robot_pos;
 			Vector2 robot_orient;
 			float robot_angle;
-			// Compute preference velocities for each agent and also send the base_scan and robot position estimates
+
+			// Compute preference velocities for each agent
 			#pragma omp parallel for reduction(+:exceptionCount)
 			for ( int a = 0; a < agtCount; ++a ) {
 				Agents::BaseAgent * agt = this->_sim->getAgent( a );
@@ -495,18 +517,25 @@ namespace Menge {
 					logger << Logger::ERR_MSG << e.what() << "\n";
 					++exceptionCount;
 				}
-				geometry_msgs::Pose pose;
+			}
+			
+			// Compute the robot laser scan and position  	
+			#pragma omp parallel for reduction(+:exceptionCount)		
+			for(int a = 0; a < agtCount; ++a){
+				Agents::BaseAgent * agt = this->_sim->getAgent( a );
 				
-				pose.position.x = agt->_pos._x;
-				pose.position.y = agt->_pos._y;
-				pose.position.z = 0.0;
-
-				pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0.0, 0.0, atan2(agt->_orient._y, agt->_orient._x));
-
-				geometry_msgs::PoseStamped poseStamped;
-				poseStamped.pose = pose;
-
 				if(agt->_isExternal){
+					geometry_msgs::Pose pose;
+				
+					pose.position.x = agt->_pos._x;
+					pose.position.y = agt->_pos._y;
+					pose.position.z = 0.0;
+
+					pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0.0, 0.0, atan2(agt->_orient._y, agt->_orient._x));
+
+					geometry_msgs::PoseStamped poseStamped;
+					poseStamped.pose = pose;
+
 					robot_pos = agt->_pos;
 					robot_orient = agt->_orient;
 					robot_angle = atan2(agt->_orient._y, agt->_orient._x);
@@ -529,7 +558,7 @@ namespace Menge {
         					ros::Time::now() + ros::Duration(0),"pose", "base_scan"));
 
 					//std::cout << "Robot position : (" << pose.position.x << "," << pose.position.y << ")" << std::endl;  
-					//std::cout << "Robot orientation : (" << agt->_orient._x << "," << agt->_orient._y << ")" << std::endl;  
+					//std::cout << "Robot orientation : (" << agt->_orient._x << "," << agt->_orient._y << ") : " << atan2(agt->_orient._y, agt->_orient._x) << std::endl;  
 
 					poseStamped.header.stamp = ros::Time::now();
 					//Change it to odom frame for IMU measurements
@@ -547,11 +576,20 @@ namespace Menge {
 
 				}
 			}
+
+
 			// Compute and publish the crowd positions that is visible to the robot via laser scan
 			for ( int a = 0; a < agtCount; ++a ) {
 				Agents::BaseAgent * agt = this->_sim->getAgent( a );
 				Vector2 agent_pos = agt->_pos;
 				Vector2 agent_orient = agt->_orient;
+				geometry_msgs::Pose pose;
+				pose.position.x = agent_pos._x;
+				pose.position.y = agent_pos._y;
+				pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0.0, 0.0, atan2(agt->_orient._y, agt->_orient._x));
+				if(!agt->_isExternal){
+					crowd_all.poses.push_back(pose);
+				}
 				if(_sim->queryVisibility(agent_pos,robot_pos, 0.1) and !agt->_isExternal){
 					double dx = agent_pos._x - robot_pos._x;
 					double dy = agent_pos._y - robot_pos._y;
@@ -573,12 +611,7 @@ namespace Menge {
 					else if(difference < -6.283){
 						difference = difference + 6.283;
 					}
-					 
 					if(distance < 25 and abs(difference) < 1.9198){
-						geometry_msgs::Pose pose;
-						pose.position.x = agent_pos._x;
-						pose.position.y = agent_pos._y;
-						pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0.0, 0.0, atan2(agt->_orient._y, agt->_orient._x));
 						crowd.poses.push_back(pose);
 					}
 				}
@@ -587,6 +620,10 @@ namespace Menge {
 			crowd.header.stamp = current_time;
 			crowd.header.frame_id = "map";
 			_pub_crowd.publish(crowd);
+
+			crowd_all.header.stamp = current_time;
+			crowd_all.header.frame_id = "map";
+			_pub_crowd_all.publish(crowd_all);
 
 			if ( exceptionCount > 0 ) {
 				throw FSMFatalException();
