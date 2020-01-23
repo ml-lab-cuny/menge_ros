@@ -112,6 +112,39 @@ namespace Menge {
 			 */
 			virtual Vector2 getCentroid() const;
 
+            /*!
+            @brief   Converts a position vector from the geometry origin to P, expressed in the geometry 
+                     frame (`r_GP`) to a position vector from the world origin to P, expressed in the
+                     world frame (`r_WP`).
+
+            @param  r_GP    The position vector from the geometry origin to a point P, expressed in the
+                            geometry frame.
+            @retval r_WP_W  The position vector from world origin to the point P, expressed in the world
+                            frame.
+            */
+            Vector2 convertToWorld(const Vector2& r_GP) const;
+
+            /*!
+            @brief  Converts a position vector from the world origin to P, expressed in the world frame
+                    (`r_WP`) to a position vector from the geometry origin to P, expressed in the
+                    geometry frame (`r_GP`).
+
+            @param  r_WP    The position vector from the world origin to a point P, expressed in the world
+                            frame.
+            @retval r_GP_G  The position vector from geometry origin to the point P, expressed in the
+                            geometry frame.
+            */
+            Vector2 convertToGeometry(const Vector2& r_WP) const;
+
+            /*!
+            @returns  The direction of the obb's x-axis expressed in the world frame.
+            */
+            Vector2 getXBasis() const { return Vector2(_rot0._x, _rot1._x); }
+            /*!
+            @returns  The direction of the obb's y-axis expressed in the world frame.
+            */
+            Vector2 getYBasis() const { return Vector2(-_rot1._x, _rot0._x); }
+
 			/*!
 			 *	@brief		Set the OBB's pivot point.
 			 *

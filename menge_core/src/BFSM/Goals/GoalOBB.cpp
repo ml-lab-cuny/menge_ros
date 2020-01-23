@@ -87,12 +87,14 @@ namespace Menge  {
 			// First rotate so that the OBB is an AABB then use the same logic as
 			//	with the AABB
 			Vector2 disp = q - _pivot;
-			float cosTheta = _rot0._x;
-			float sinTheta = _rot1._x;
+            // Rotation from world to geometry: R = [Bx By]^T.
+            Vector2 Bx = getXBasis();
+            Vector2 By = getYBasis();
+
 			// the LOCAL x- and y- coordinates of the nearest point, initialized to the
 			//	local value of the query point.
-			float X = disp.x() * cosTheta + disp.y() * sinTheta;
-			float Y = disp.y() * cosTheta - disp.x() * sinTheta;
+			float X = Bx * disp;
+            float Y = By * disp;
 			
 			// based on the voronoi regions of the AABB
 			//	 (-1,1)  |        (0,1)        |  (1,1)
@@ -148,15 +150,18 @@ namespace Menge  {
 				}
 
 				Vector2 localPt( X, Y );
-				Vector2 targetPt( _pivot + Vector2( localPt * _rot0, localPt * _rot1 ) );
+                // Rotation from geometry to world is: R = [Bx, By]
+                Vector2 rot0(Bx._x, By._x);
+                Vector2 rot1(Bx._y, By._y);
+				Vector2 targetPt( _pivot + Vector2( localPt * rot0, localPt * rot1 ) );
 				directions.setTarget( targetPt );
 				Vector2 prefDir( norm( targetPt - q ) );
 				if ( dimensions ) {
 					// there is actually a span
 					localPt.set( xL, yL );
-					Vector2 leftPt( _pivot + Vector2( localPt * _rot0, localPt * _rot1 ) );
+					Vector2 leftPt( _pivot + Vector2( localPt * rot0, localPt * rot1 ) );
 					localPt.set( xR, yR );
-					Vector2 rightPt( _pivot + Vector2( localPt * _rot0, localPt * _rot1 ) );
+					Vector2 rightPt( _pivot + Vector2( localPt * rot0, localPt * rot1 ) );
 					directions.setSpan( norm( leftPt - q ),
 										norm( rightPt - q ),
 										prefDir );
@@ -174,9 +179,14 @@ namespace Menge  {
 			Vector2 disp = q - _pivot;
 			float cosTheta = _rot0._x;
 			float sinTheta = _rot1._x;
-			float X = disp.x() * cosTheta + disp.y() * sinTheta;
-			float Y = disp.y() * cosTheta - disp.x() * sinTheta;
-			
+			// Rotation from world to geometry: R = [Bx By]^T.
+            Vector2 Bx = getXBasis();
+            Vector2 By = getYBasis();
+            // the LOCAL x- and y- coordinates of the nearest point, initialized to the
+            //  local value of the query point.
+            float X = Bx * disp;
+            float Y = By * disp;
+
 			// based on the voronoi regions of the AABB
 			//	 0 |         1          |  2
 			// ----------------------------------------
@@ -215,36 +225,63 @@ namespace Menge  {
 			}
 
 			Vector2 localPt( X, Y );
+            // Rotation from geometry to world is: R = [Bx, By]
+            Vector2 rot0(Bx._x, By._x);
+            Vector2 rot1(Bx._y, By._y);
 
-			return _pivot + Vector2( localPt * _rot0, localPt * _rot1 );	
+			return _pivot + Vector2( localPt * rot0, localPt * rot1 );	
 		}
 
 		/////////////////////////////////////////////////////////////////////
 
 		Vector2 OBBGoal::getCentroid() const {
-			return _pivot + _rot0 * ( _size.x() * 0.5f ) + _rot1 * ( _size.y() * 0.5f );
+			return _pivot + getXBasis() * ( _size.x() * 0.5f ) + getYBasis() * ( _size.y() * 0.5f );
 		}
+        
+        /////////////////////////////////////////////////////////////////////
 
+        Vector2 OBBGoal::convertToWorld(const Vector2& r_GP) const {
+            Vector2 Bx = getXBasis();
+            Vector2 By = getYBasis();
+            Vector2 r_GP_W(r_GP * Vector2(Bx._x, By._x), r_GP * Vector2(Bx._y, By._y));
+            return _pivot + r_GP_W;
+        }
+
+        /////////////////////////////////////////////////////////////////////
+
+        Vector2 OBBGoal::convertToGeometry(const Vector2& r_WP) const {
+            Vector2 r_GP_W = r_WP - _pivot;
+            return Vector2(r_GP_W * getXBasis(), r_GP_W * getYBasis());
+        }
 		/////////////////////////////////////////////////////////////////////
 
 		void OBBGoal::drawGLGeometry() const{
-			Vector2 c( _size.x(), 0.f );
-			Vector2 c1( c * _rot0, c * _rot1 );
-			c.set( _size );
-			Vector2 c2( c * _rot0, c * _rot1 );
-			c.set( 0.f, _size.y() );
-			Vector2 c3( c * _rot0, c * _rot1 );
+//			Vector2 c( _size.x(), 0.f );
+//			Vector2 c1( c * _rot0, c * _rot1 );
+//			c.set( _size );
+//			Vector2 c2( c * _rot0, c * _rot1 );
+//			c.set( 0.f, _size.y() );
+//			Vector2 c3( c * _rot0, c * _rot1 );
+            Vector2 c( 0.f, 0.f );
+            Vector2 c0 = convertToWorld(c);
+            c.set( _size.x(), 0.f );
+            Vector2 c1 = convertToWorld(c);
+            c.set( _size );
+            Vector2 c2 = convertToWorld(c);
+            c.set( 0.f, _size.y() );
+            Vector2 c3 = convertToWorld(c);
 
-			glPushMatrix();
-			glTranslatef( _pivot.x(), 0.f, _pivot.y() );
+//			glPushMatrix();
+//			glTranslatef( _pivot.x(), 0.f, _pivot.y() );
 			glBegin( GL_POLYGON );
-				glVertex3f( 0.f, 0.f, 0.f );
+				glVertex3f( c0.x(), 0.f, c0.y() );
 				glVertex3f( c1.x(), 0.f, c1.y() );
 				glVertex3f( c2.x(), 0.f, c2.y() );
 				glVertex3f( c3.x(), 0.f, c3.y() );
-				glVertex3f( 0.f, 0.f, 0.f );
+//				glVertex3f( 0.f, 0.f, 0.f );
 			glEnd();
-			glPopMatrix();
+//			glPopMatrix();
+            
 		}
 
 		/////////////////////////////////////////////////////////////////////
