@@ -62,7 +62,7 @@ namespace Menge {
 		const float PRIORITY = 0.f;					///< The default priority
 		const float MAX_ANGLE_VEL = TWOPI;			///< The default maximum angular velocity
 		const size_t OBSTACLE_SET = 0xFFFFFFFF;		///< The default obstacle set (all obstacles)
-		const int EXTERNAL = 0;				///< The default agent is internally controlled 
+		const int EXTERNAL = 0;				        ///< The default agent is internally controlled 
 		const float RANGE_MAX = 25.0f;
 		const float START_ANGLE = -1.96f;
 		const float END_ANGLE = 1.96f;

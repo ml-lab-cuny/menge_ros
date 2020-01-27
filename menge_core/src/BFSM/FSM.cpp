@@ -221,7 +221,7 @@ namespace Menge {
 			agent->setPreferredVelocity(newVel);
 		}
 
-		void FSM::transformToEndpoints(Vector2 pos, float angle, sensor_msgs::LaserScan ls){
+		void FSM::transformToEndpoints(Vector2 pos, float angle, sensor_msgs::LaserScan ls, geometry_msgs::PoseArray& end_array) {
     			ROS_DEBUG("Convert laser scan to endpoints");
     			double start_angle = ls.angle_min;
     			double increment = ls.angle_increment;
@@ -229,25 +229,19 @@ namespace Menge {
     			double r_x = pos._x;
     			double r_y = pos._y;
     			double r_ang = angle;
-
-			ros::Time current_time;
-  			current_time = ros::Time::now();
-			geometry_msgs::PoseArray end;
-			end.header.frame_id = "map";
-			end.header.stamp = ros::Time::now();
     			
     			for(int i = 0 ; i < ls.ranges.size(); i++){
-				geometry_msgs::Pose pose;
-				pose.position.x = r_x + (ls.ranges[i] * cos(start_angle + r_ang));
-				pose.position.y = r_y + (ls.ranges[i] * sin(start_angle + r_ang));
-				end.poses.push_back(pose);
-       				start_angle = start_angle + increment;
+				    geometry_msgs::Pose pose;
+				    pose.position.x = r_x + (ls.ranges[i] * cos(start_angle + r_ang));
+				    pose.position.y = r_y + (ls.ranges[i] * sin(start_angle + r_ang));
+				    end_array.poses.push_back(pose);
+       				start_angle += increment;
     			}
-			_pub_endpoints.publish(end);
-		}
+
+		    }
 
 
-		void FSM::computeRayScan( Agents::BaseAgent * agent, sensor_msgs::LaserScan& ls) {
+		void FSM::computeRayScan( Agents::BaseAgent * agent, sensor_msgs::LaserScan& ls, sensor_msgs::LaserScan& ls_static) {
 			const size_t ID = agent->_id;
 			// Evalute the new state's velocity
 			
@@ -257,32 +251,42 @@ namespace Menge {
 			float end_angle = agent->_end_angle;
 			float increment = agent->_increment;
 			float range_max = agent->_range_max; 
-			//In meters 
-			float angles[660];			
+			//In meters
+            int increment_steps = (end_angle - start_angle) / increment;
+            //std::cout << "num increment steps: " << increment_steps << std::endl;
+			float angles[increment_steps];			
 
-			for(int i = 0;i < 660;i++){
+			for(int i = 0;i < increment_steps;i++){
 				ls.ranges.push_back(0);
+                ls_static.ranges.push_back(0);
 				angles[i] = start_angle + (increment * i);
 			}
 
-			// parallel implementati
+			// parallel implementation
 			//std::cout << "Parallelization " << ls.ranges.size() << std::endl; 
 			#pragma omp parallel for
-			for(int i = 0; i < 660; i++){
+			for(int i = 0; i < increment_steps; i++){
 				//std::cout << "Generating obstacle distance " << angle; 
 				//for each angle compute the distance from the obstacle
 				float distance =  distanceFromObstacle(angles[i],range_max, agent);
-				float distance_agent = distanceFromAgent(angles[i],range_max, agent);
-				if(distance > distance_agent){
-					distance = distance_agent;
-				}
-				ls.ranges[i] = distance;
+                ls_static.ranges[i] = distance;
+                //std::cout << " statdist : " << distance << std::endl;
+			    float distance_agent = distanceFromAgent(angles[i],range_max, agent);
+                if(distance > distance_agent){
+				    distance = distance_agent;
+				    }
+                ls.ranges[i] = distance;
 				//std::cout << " distance : " << distance << std::endl; 
 			}
 			ls.angle_min = start_angle;
 			ls.angle_max = end_angle;
 			ls.angle_increment = increment;
 			ls.range_max = range_max;
+
+            ls_static.angle_min = start_angle;
+			ls_static.angle_max = end_angle;
+			ls_static.angle_increment = increment;
+			ls_static.range_max = range_max;
 			//std::cout << i << std::endl; 
 		}
 
@@ -505,6 +509,9 @@ namespace Menge {
 			Vector2 robot_pos;
 			Vector2 robot_orient;
 			float robot_angle;
+            float robot_start_fov;
+            float robot_end_fov;
+            float robot_range_max;
 
 			// Compute preference velocities for each agent
 			#pragma omp parallel for reduction(+:exceptionCount)
@@ -525,6 +532,7 @@ namespace Menge {
 				Agents::BaseAgent * agt = this->_sim->getAgent( a );
 				
 				if(agt->_isExternal){
+//                    ros::Time scan_time = ros::Time::now();
 					geometry_msgs::Pose pose;
 				
 					pose.position.x = agt->_pos._x;
@@ -539,6 +547,9 @@ namespace Menge {
 					robot_pos = agt->_pos;
 					robot_orient = agt->_orient;
 					robot_angle = atan2(agt->_orient._y, agt->_orient._x);
+                    robot_start_fov = agt->_start_angle;
+                    robot_end_fov = agt->_end_angle;
+                    robot_range_max = agt->_range_max;
 					//std::cout << agt->_id << std::endl;
 					//std::cout <<"pos:" << agt->_pos._x << " " << agt->_pos._y << std::endl;
 					//std::cout <<"vel:" << agt->_vel._x << " " << agt->_vel._y << std::endl;
@@ -546,34 +557,60 @@ namespace Menge {
 						
 					tf::TransformBroadcaster broadcaster1;
 					tf::TransformBroadcaster broadcaster2;
+                    tf::TransformBroadcaster broadcaster3;
 
-					broadcaster1.sendTransform(
+				        broadcaster1.sendTransform(
       						tf::StampedTransform(
         					tf::Transform(tf::createIdentityQuaternion(), tf::Vector3(0.0, 0.0, 0.0)),
-        					ros::Time::now() + ros::Duration(0),"map", "pose"));
-					broadcaster2.sendTransform(
+                            current_time,"map", "pose"));
+//        					ros::Time::now() + ros::Duration(0),"map", "pose"));
+				        broadcaster2.sendTransform(
       						tf::StampedTransform(
         					tf::Transform(tf::createQuaternionFromRPY(0.0, 0.0, robot_angle), 
-						tf::Vector3(pose.position.x, pose.position.y, 0.0)),
-        					ros::Time::now() + ros::Duration(0),"pose", "base_scan"));
+						    tf::Vector3(pose.position.x, pose.position.y, 0.0)),
+                            current_time,"pose", "base_scan"));
+//        					ros::Time::now() + ros::Duration(0),"pose", "base_scan"));
+                        broadcaster3.sendTransform(
+      						tf::StampedTransform(
+        					tf::Transform(tf::createQuaternionFromRPY(0.0, 0.0, robot_angle), 
+						    tf::Vector3(pose.position.x, pose.position.y, 0.0)),
+                            current_time,"pose", "static_scan"));
+//        					ros::Time::now() + ros::Duration(0),"pose", "static_scan"));
 
 					//std::cout << "Robot position : (" << pose.position.x << "," << pose.position.y << ")" << std::endl;  
 					//std::cout << "Robot orientation : (" << agt->_orient._x << "," << agt->_orient._y << ") : " << atan2(agt->_orient._y, agt->_orient._x) << std::endl;  
 
-					poseStamped.header.stamp = ros::Time::now();
+					poseStamped.header.stamp = current_time;
 					//Change it to odom frame for IMU measurements
-    					poseStamped.header.frame_id = "map";
+					poseStamped.header.frame_id = "map";
 					_pub_pose.publish(poseStamped);
-					//send laser sensor messages
-					sensor_msgs::LaserScan ls;					
-					this->computeRayScan(agt,ls);
-					ls.header.stamp = ros::Time::now();
+                    
+                    //send laser sensor messages
+					sensor_msgs::LaserScan ls;
+                    // static scan does not scan for other agents but only obstacles
+                    sensor_msgs::LaserScan ls_static;					
+					this->computeRayScan(agt,ls,ls_static);
+
+                    ls.header.stamp = current_time;
 					ls.header.frame_id = "base_scan";
 					_pub_scan.publish(ls);
 
-					//publish endpoints for rviz display
-					transformToEndpoints(robot_pos,robot_angle,ls);
+					ls_static.header.stamp = current_time;
+					ls_static.header.frame_id = "static_scan";
+					_pub_static_scan.publish(ls_static);
 
+					//publish endpoints for rviz display
+                    geometry_msgs::PoseArray end;
+					transformToEndpoints(robot_pos,robot_angle,ls,end);
+                    end.header.frame_id = "map";
+			        end.header.stamp = current_time;
+                    _pub_endpoints.publish(end);
+                    //publish static endpoints for rviz display
+			        geometry_msgs::PoseArray end_static;
+					transformToEndpoints(robot_pos,robot_angle,ls_static,end_static);
+                    end_static.header.frame_id = "map";
+			        end_static.header.stamp = current_time;
+                    _pub_static_endpoints.publish(end_static);
 				}
 			}
 
@@ -611,7 +648,7 @@ namespace Menge {
 					else if(difference < -6.283){
 						difference = difference + 6.283;
 					}
-					if(distance < 25 and abs(difference) < 1.9198){
+					if(distance < robot_range_max and difference > robot_start_fov and difference < robot_end_fov){
 						crowd.poses.push_back(pose);
 					}
 				}

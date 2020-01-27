@@ -353,7 +353,7 @@ namespace Menge {
 			 *
 			 *	@returns	A laser scan in the ROS sensor_msgs format.
 			 */
-			void computeRayScan( Agents::BaseAgent * agent, sensor_msgs::LaserScan& ls);
+			void computeRayScan( Agents::BaseAgent * agent, sensor_msgs::LaserScan& ls, sensor_msgs::LaserScan& ls_static);
 			/*!
 			 *	@brief		Computes the distance from the obstacle in a particular direction.
 			 *
@@ -395,6 +395,8 @@ namespace Menge {
 				_pub_pose = _nh->advertise<geometry_msgs::PoseStamped>("pose", 50);
 				_pub_scan = _nh->advertise<sensor_msgs::LaserScan>("base_scan", 50);
 				_pub_endpoints = _nh->advertise<geometry_msgs::PoseArray>("laser_end", 50);
+                _pub_static_scan = _nh->advertise<sensor_msgs::LaserScan>("static_scan", 50);
+                _pub_static_endpoints = _nh->advertise<geometry_msgs::PoseArray>("laser_static_end", 50);
 			}
 			/*!
 			 *	@brief		return ROS node handle
@@ -403,7 +405,7 @@ namespace Menge {
 			 */
 			ros::NodeHandle* getNodeHandle(){return _nh;}
 
-			void transformToEndpoints(Vector2 pos, float angle, sensor_msgs::LaserScan ls);
+			void transformToEndpoints(Vector2 pos, float angle, sensor_msgs::LaserScan ls, geometry_msgs::PoseArray& end_array);
 
 		protected:
 			/*!
@@ -453,6 +455,8 @@ namespace Menge {
 			ros::Publisher _pub_odom;
 			ros::Publisher _pub_scan;
 			ros::Publisher _pub_endpoints;
+            ros::Publisher _pub_static_scan;
+            ros::Publisher _pub_static_endpoints;
 			Agents::PrefVelocity prefVelMsg;
 			std::vector< size_t > _robotIDList;
 		};
