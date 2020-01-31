@@ -87,7 +87,8 @@ namespace Menge {
 					throw VelCompFatalException( "Can't compute a path to a goal outside of the navigation mesh.  Bad NavMeshVelComponent!" );
 				}
 				unsigned int agtNode = _localizer->getNode( agent );
-				PortalRoute * route = _localizer->getPlanner()->getRoute( agtNode, goalNode, agent->_radius * 2.f );
+				PortalRoute * route = _localizer->getPlanner()->getRoute( agtNode, goalNode, agent->_radius * 4.f );
+//				PortalRoute * route = _localizer->getPlanner()->getRoute( agtNode, goalNode, agent->_radius * 2.f );
 				// compute the path
 				path = new PortalPath( agent->_pos, goal, route, agent->_radius );
 				// assign it to the localizer
