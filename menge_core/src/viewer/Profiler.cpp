@@ -124,6 +124,14 @@ namespace Menge {
 
 		////////////////////////////////////////////////////////////////////////////
 
+		void LapTimer::restart() {
+            __int64 t;
+			::QueryPerformanceCounter( (LARGE_INTEGER*) &t );
+            _start = t;
+		}
+
+		////////////////////////////////////////////////////////////////////////////
+
 		float LapTimer::average( float scale ) {
 			return (float)_total / (float)_lapCount / (float)(FREQ) * scale ;
 		}
@@ -145,6 +153,13 @@ namespace Menge {
 		}
 		////////////////////////////////////////////////////////////////////////////
 
+		void LapTimer::restart() {
+            struct timespec t;
+            clock_gettime( CLOCK_REALTIME, &t );
+            _start = t;
+		}
+
+        ////////////////////////////////////////////////////////////////////////////
 		float LapTimer::average( float scale ) {
 			return (float)_total / (float)_lapCount * scale ;
 		}

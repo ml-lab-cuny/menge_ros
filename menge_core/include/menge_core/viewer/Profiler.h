@@ -127,6 +127,11 @@ namespace Menge {
 			float lap( float scale=1.f );
 
 			/*!
+			 * @brief       Resets the _start attribute to the current time
+			 */
+			void restart();
+
+			/*!
 			 *	@brief		Reports the average lap time across all recorded laps.
 			 *
 			 *	@param		scale		The scale of the units to report the elapsed time in.

@@ -48,6 +48,10 @@ Any questions or comments should be sent to the authors {menge,geom}@cs.unc.edu
 #include "CoreConfig.h"
 #include "Profiler.h"
 
+// ROS
+#include <ros/ros.h>
+#include <std_msgs/Bool.h>
+
 namespace Menge {
 
 	// forward declarations
@@ -99,6 +103,28 @@ namespace Menge {
 			 */
 			void setFixedStep( float stepSize );
 
+            /*!
+             *	@brief		Add ROS node handle to NullViewer
+             *
+             *	@param		pointer to node handle
+             */
+
+            void setStepFromMsg(const std_msgs::Bool::ConstPtr& msg);
+
+            void setRunFromMsg(const std_msgs::Bool::ConstPtr& msg);
+
+            void addNodeHandle( ros::NodeHandle *nh){
+                _nh = nh;
+                _sub_step = _nh->subscribe("step", 1000, &Menge::Vis::NullViewer::setStepFromMsg, this);
+                _sub_run = _nh->subscribe("run", 1000, &Menge::Vis::NullViewer::setRunFromMsg, this);
+            }
+            /*!
+             *	@brief		return ROS node handle
+             *
+             *	@param		void
+             */
+            ros::NodeHandle* getNodeHandle(){return _nh;}
+
 		protected:
 			/*!
 			 *	@brief		The GLScene to draw.
@@ -114,6 +140,24 @@ namespace Menge {
 			 *	@brief		Timer for determining computation time.
 			 */
 			LapTimer	_fpsTimer;
+
+            /*!
+             *	@brief		Controls whether the viewer advances the GLScene (true) or not (false).
+             */
+            bool	_pause;
+
+            /*!
+             *	@brief		Determines if a simulation step is requested via ROS message
+             */
+            bool    _step;
+
+            /*!
+             *	@brief		ROS node handle
+             */
+
+            ros::NodeHandle *_nh;
+            ros::Subscriber _sub_step;
+            ros::Subscriber _sub_run;
 		};
 	}	// namespace Vis
 }	// namespace Menge

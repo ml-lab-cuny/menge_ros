@@ -73,21 +73,58 @@ namespace Menge {
 			_stepSize = stepSize;
 		}
 
+        ///////////////////////////////////////////////////////////////////////////
+
+        void NullViewer::setStepFromMsg(const std_msgs::Bool::ConstPtr& msg) {
+            //copy from message and into step
+            ROS_INFO("msg received on /step:\n\tmake next sim step : [%s]", msg->data ? "true" : "false");
+            _step = msg->data;
+        }
+
+        void NullViewer::setRunFromMsg(const std_msgs::Bool::ConstPtr& msg) {
+            //copy from message and into pause
+            ROS_INFO("msg received on /run:\n\tSimulation set to running : [%s]", msg->data ? "true" : "false");
+            _pause = !msg->data;
+        }
+
 		/////////////////////////////////////////////////////////////////////////////
 
 		void NullViewer::run() {
 			if ( _scene == 0x0 ) return;
 			float viewTime = 0.f;
 			float frameLen = 0.f;
+            bool updated;
+            _pause = true;
+            _step = false;
 			_fpsTimer.start();
 			while ( true ) {
-				viewTime += _stepSize;
-				try {
-					_scene->updateScene( viewTime );
-					_fpsTimer.lap();
-				} catch ( SceneGraph::SystemStopException ) {
-					break;
-				}
+                updated = false;
+                // handle ROS messages
+                bool beforePaused = _pause;
+                ros::spinOnce();
+                bool afterwardsRunning = !_pause;
+                // restart counter after pause
+                if ( beforePaused && afterwardsRunning) {
+                    ROS_INFO("Switched from pause to running after update");
+                    _fpsTimer.restart();
+                }
+                // make simulation step if requested
+                if ( _pause && _step ) {
+                    viewTime += _stepSize;
+                    updated = true;
+                    _step = false;
+                } else if ( !_pause ) {
+                    viewTime += _stepSize;
+                    updated = true;
+                }
+                if (updated) {
+                    try {
+                        _scene->updateScene( viewTime );
+                        _fpsTimer.lap();
+                    } catch ( SceneGraph::SystemStopException ) {
+                        break;
+                    }
+                }
 			}
 			std::cout << "Average frame computation time: " << _fpsTimer.average( 0.001f ) << " ms\n";
 			_scene->finish();

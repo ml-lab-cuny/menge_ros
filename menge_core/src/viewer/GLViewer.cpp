@@ -180,6 +180,19 @@ namespace Menge {
 
 		///////////////////////////////////////////////////////////////////////////
 
+		void GLViewer::setStepFromMsg(const std_msgs::Bool::ConstPtr& msg) {
+            //copy from message and into step
+            ROS_INFO("msg received on /step:\n\tmake next sim step : [%s]", msg->data ? "true" : "false");
+            _step = msg->data;
+		}
+
+        void GLViewer::setRunFromMsg(const std_msgs::Bool::ConstPtr& msg) {
+            //copy from message and into pause
+            ROS_INFO("msg received on /run:\n\tSimulation set to running : [%s]", msg->data ? "true" : "false");
+            _pause = !msg->data;
+        }
+
+        ///////////////////////////////////////////////////////////////////////////
 		void GLViewer::run() {
 			bool redraw = true;
 			float time = 0.f;
@@ -205,6 +218,14 @@ namespace Menge {
 						redraw = true;
 					}
 				}
+                // handle ROS messages
+                _step = false;
+				ros::spinOnce();
+                // make simulation step if requested
+                if ( _pause && _step ) {
+                    offsetTime(_stepSize);
+                }
+
 				if ( !_pause ) startTimer( FULL_FRAME );
 				if ( redraw || _update || !_pause ) {
 					

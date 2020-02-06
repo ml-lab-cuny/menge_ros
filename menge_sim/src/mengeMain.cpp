@@ -153,7 +153,7 @@ int simMain( SimulatorDBEntry * dbEntry, const std::string & behaveFile, const s
 			}
 		}
 		Vis::GLViewer view( viewCfg );
-
+        view.addNodeHandle(nh);
 		view.setDumpPath( dumpPath );
 
 #ifdef NDEBUG
@@ -185,6 +185,7 @@ int simMain( SimulatorDBEntry * dbEntry, const std::string & behaveFile, const s
 		ROS_INFO_STREAM(" No visualization ");
 		logger << Logger::INFO_MSG << "NO VISUALIZATION!\n";
 		Vis::NullViewer view;	// need the call back
+		view.addNodeHandle(nh);
 		view.setScene( scene );
 		view.setFixedStep( TIME_STEP );
 		logger.line();

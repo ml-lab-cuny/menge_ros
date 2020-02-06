@@ -152,6 +152,8 @@ namespace Menge {
    			ROS_INFO("I heard: y :[%f]", msg.angular.y);
    			ROS_INFO("I heard: z :[%f]", msg.angular.z);
 
+   			// TODO: make robot non-holonomic here
+
 			float speed = msg.linear.x;
 			if(speed == 0) speed = 0.0001;
 

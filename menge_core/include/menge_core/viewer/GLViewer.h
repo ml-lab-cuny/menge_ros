@@ -58,6 +58,11 @@ Any questions or comments should be sent to the authors {menge,geom}@cs.unc.edu
 #include "Profiler.h"
 #include "ScreenGrab.h"
 
+// ROS
+#include <ros/ros.h>
+#include <std_msgs/Bool.h>
+
+
 namespace Menge {
 
 	// Forward declarations
@@ -287,6 +292,28 @@ namespace Menge {
 			 */
 			void setDumpPath( const std::string & path );
 
+			/*!
+			 *	@brief		Add ROS node handle to GLViewer
+			 *
+			 *	@param		pointer to node handle
+			 */
+
+			void setStepFromMsg(const std_msgs::Bool::ConstPtr& msg);
+
+            void setRunFromMsg(const std_msgs::Bool::ConstPtr& msg);
+
+			void addNodeHandle( ros::NodeHandle *nh){
+				_nh = nh;
+				_sub_step = _nh->subscribe("step", 1000, &Menge::Vis::GLViewer::setStepFromMsg, this);
+				_sub_run = _nh->subscribe("run", 1000, &Menge::Vis::GLViewer::setRunFromMsg, this);
+			}
+			/*!
+			 *	@brief		return ROS node handle
+			 *
+			 *	@param		void
+			 */
+			ros::NodeHandle* getNodeHandle(){return _nh;}
+
 		protected:
 			/*!
 			 *	@brief		The various SDL flags which determine the view.
@@ -361,6 +388,10 @@ namespace Menge {
 			bool	_pause;
 
 			/*!
+			 *	@brief		Determines if a simulation step is requested via ROS message
+			 */
+			bool    _step;
+			/*!
 			 *	@brief		Determines if the viewer should still operate -- as long as it is true, it will
 			 *				continue its main loop (@see GLViewer::run).  
 			 */
@@ -418,6 +449,12 @@ namespace Menge {
 			 */
 			std::vector< SceneGraph::GLLight > _lights;
 
+            /*!
+             *	@brief		ROS node handle
+             */
+            ros::NodeHandle *_nh;
+            ros::Subscriber _sub_step;
+            ros::Subscriber _sub_run;
 			/*!
 			 *	@brief		Initizlies the OpenGL lighting based on the set of lights.
 			 */
@@ -435,6 +472,7 @@ namespace Menge {
 			 *	@brief		Draws a simple, three-color world axis at the origin of world space.
 			 */
 			void drawWorldAxis() const;
+
 		};
 	}	// namespace Vis
 }	// namespace Menge
