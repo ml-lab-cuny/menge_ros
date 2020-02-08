@@ -66,6 +66,7 @@ Any questions or comments should be sent to the authors {menge,geom}@cs.unc.edu
 
 //ROS
 #include <ros/ros.h>
+#include <ros/callback_queue.h>
 #include <geometry_msgs/Twist.h>
 
 using namespace Menge;
@@ -117,12 +118,12 @@ void velCallback(const geometry_msgs::Twist& msg)
  *	@param		dumpPath		The path to write screen grabs.  Only used in windows.
  *	@returns	0 for a successful run, non-zero otherwise.
  */
-int simMain( SimulatorDBEntry * dbEntry, const std::string & behaveFile, const std::string & sceneFile, const std::string & outFile, const std::string & scbVersion, bool visualize, const std::string & viewCfgFile, const std::string & dumpPath, ros::NodeHandle * nh) {
-
+int simMain( SimulatorDBEntry * dbEntry, const std::string & behaveFile, const std::string & sceneFile, const std::string & outFile, const std::string & scbVersion, bool visualize, const std::string & viewCfgFile, const std::string & dumpPath, ros::NodeHandle * nh_viewer, ros::NodeHandle * nh_fsm) {
+    ros::CallbackQueue queue;
 	size_t agentCount;
 	if ( outFile != "" ) logger << Logger::INFO_MSG << "Attempting to write scb file: " << outFile << "\n";
 	//Initialize simulator	
-	SimSystem * system = dbEntry->getSimulatorSystem( agentCount, TIME_STEP, SUB_STEPS, SIM_DURATION, behaveFile, sceneFile, outFile, scbVersion, visualize, VERBOSE, nh);
+	SimSystem * system = dbEntry->getSimulatorSystem( agentCount, TIME_STEP, SUB_STEPS, SIM_DURATION, behaveFile, sceneFile, outFile, scbVersion, visualize, VERBOSE, nh_fsm);
 
 	if ( system == 0x0 ) {
 		return 1;
@@ -153,7 +154,7 @@ int simMain( SimulatorDBEntry * dbEntry, const std::string & behaveFile, const s
 			}
 		}
 		Vis::GLViewer view( viewCfg );
-        view.addNodeHandle(nh);
+        view.addNodeHandle(nh_viewer, queue);
 		view.setDumpPath( dumpPath );
 
 #ifdef NDEBUG
@@ -178,19 +179,19 @@ int simMain( SimulatorDBEntry * dbEntry, const std::string & behaveFile, const s
 			view.newGLContext();
 			logger.line();
 		
-			view.run();
+			view.run(queue);
 			logger << Logger::INFO_MSG << "Simulation time: " << dbEntry->simDuration() << "\n";
 		}
 	} else  {
 		ROS_INFO_STREAM(" No visualization ");
 		logger << Logger::INFO_MSG << "NO VISUALIZATION!\n";
 		Vis::NullViewer view;	// need the call back
-		view.addNodeHandle(nh);
+		view.addNodeHandle(nh_viewer, queue);
 		view.setScene( scene );
 		view.setFixedStep( TIME_STEP );
 		logger.line();
 		
-		view.run();
+		view.run(queue);
 		std::cout << "Simulation time: " << dbEntry->simDuration() << "\n";
 		logger << Logger::INFO_MSG << "Simulation time: " << dbEntry->simDuration() << "\n";
 	}
@@ -202,8 +203,8 @@ int simMain( SimulatorDBEntry * dbEntry, const std::string & behaveFile, const s
 int main(int argc, char* argv[]) {
 
 	ros::init(argc,argv,"menge_sim");
-	ros::NodeHandle nh;
-
+	ros::NodeHandle nh_viewer;
+    ros::NodeHandle nh_fsm;
 	//ROS_INFO_STREAM(" argument count " << argc << "," << argv[0] << "," << argv[1] << "," << argv[2]);
 	/*
 	std::string map_xml;
@@ -287,7 +288,7 @@ int main(int argc, char* argv[]) {
 
 	ROS_INFO_STREAM(" useviz "<< useVis);
 
-	int result = simMain( simDBEntry, projSpec.getBehavior(), projSpec.getScene(), projSpec.getOutputName(), projSpec.getSCBVersion(), useVis, viewCfgFile, dumpPath , &nh);
+	int result = simMain( simDBEntry, projSpec.getBehavior(), projSpec.getScene(), projSpec.getOutputName(), projSpec.getSCBVersion(), useVis, viewCfgFile, dumpPath , &nh_viewer, &nh_fsm);
 
 	if ( result ) {
 		std::cerr << "Simulation terminated through error.  See error log for details.\n";

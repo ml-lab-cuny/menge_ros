@@ -193,9 +193,11 @@ namespace Menge {
         }
 
         ///////////////////////////////////////////////////////////////////////////
-		void GLViewer::run() {
+		void GLViewer::run(ros::CallbackQueue &queue) {
 			bool redraw = true;
 			float time = 0.f;
+            bool lastItrPaused = _pause;
+            bool lastItrStep = _step;
 			_fpsDisplayTimer.start();
 
 			while ( _running ) {
@@ -219,14 +221,28 @@ namespace Menge {
 					}
 				}
                 // handle ROS messages
-                _step = false;
-				ros::spinOnce();
-                // make simulation step if requested
-                if ( _pause && _step ) {
-                    offsetTime(_stepSize);
+				queue.callAvailable(ros::WallDuration());
+
+				// restart spinner after pause
+                if (lastItrPaused && !_pause) {
+                    ROS_INFO("Switched from pause to running after update");
+                    ros::getGlobalCallbackQueue()->clear();
+                    _spinner->start();
+                // stop spinner after pausing simulation or after executing step
+                } else if ((!lastItrPaused && _pause) || lastItrStep) {
+                    _spinner->stop();
+                    lastItrStep = false;
                 }
 
-				if ( !_pause ) startTimer( FULL_FRAME );
+                // start spinner for step + update sim
+                if ( _pause && _step ) {
+                    _spinner->start();
+                    offsetTime(_stepSize);
+                    redraw = _update = true;
+                    _step = false;
+                    lastItrStep = true;
+                } else if ( !_pause ) startTimer( FULL_FRAME );
+
 				if ( redraw || _update || !_pause ) {
 					
 					// draw stuff
@@ -265,10 +281,13 @@ namespace Menge {
 					snapshotPNG( _width, _height, fullPath.str().c_str() );
 				}
 				_update = false;
+				lastItrPaused = _pause;
 			}
 			printAverages();
 
 			_scene->finish();
+            // Release AsyncSpinner object
+			_spinner.reset();
 		}
 
 		///////////////////////////////////////////////////////////////////////////

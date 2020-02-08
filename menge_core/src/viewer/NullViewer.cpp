@@ -89,45 +89,61 @@ namespace Menge {
 
 		/////////////////////////////////////////////////////////////////////////////
 
-		void NullViewer::run() {
+		void NullViewer::run(ros::CallbackQueue &queue) {
+
 			if ( _scene == 0x0 ) return;
 			float viewTime = 0.f;
 			float frameLen = 0.f;
             bool updated;
             _pause = true;
+            bool lastItrPaused = _pause;
             _step = false;
+            bool lastItrStep = _step;
 			_fpsTimer.start();
-			while ( true ) {
+
+			while ( ros::ok() ) {
                 updated = false;
-                // handle ROS messages
-                bool beforePaused = _pause;
-                ros::spinOnce();
-                bool afterwardsRunning = !_pause;
-                // restart counter after pause
-                if ( beforePaused && afterwardsRunning) {
+
+                queue.callAvailable(ros::WallDuration());
+
+                // restart spinner and timer after pause
+                if (lastItrPaused && !_pause) {
                     ROS_INFO("Switched from pause to running after update");
+                    ros::getGlobalCallbackQueue()->clear();
+                    _spinner->start();
                     _fpsTimer.restart();
+                // stop spinner after pausing simulation or after executing step
+                } else if ((!lastItrPaused && _pause) || lastItrStep) {
+                    _spinner->stop();
+                    lastItrStep = false;
                 }
                 // make simulation step if requested
-                if ( _pause && _step ) {
+                if (_pause && _step) {
+                    _spinner->start();
                     viewTime += _stepSize;
                     updated = true;
                     _step = false;
-                } else if ( !_pause ) {
+                    lastItrStep = true;
+                } else if (!_pause) {
                     viewTime += _stepSize;
                     updated = true;
                 }
+
                 if (updated) {
                     try {
-                        _scene->updateScene( viewTime );
+                        _scene->updateScene(viewTime);
                         _fpsTimer.lap();
-                    } catch ( SceneGraph::SystemStopException ) {
+                    } catch (SceneGraph::SystemStopException) {
                         break;
                     }
                 }
-			}
+
+                lastItrPaused = _pause;
+            }
 			std::cout << "Average frame computation time: " << _fpsTimer.average( 0.001f ) << " ms\n";
 			_scene->finish();
+            // Release AsyncSpinner object
+            _spinner.reset();
 		}
 	}	 // namespace Vis
 }	// namespace Menge

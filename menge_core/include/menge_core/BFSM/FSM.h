@@ -57,6 +57,8 @@ Any questions or comments should be sent to the authors {menge,geom}@cs.unc.edu
 
 // ROS
 #include <ros/ros.h>
+#include <ros/spinner.h>
+#include <ros/callback_queue.h>
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/PoseArray.h>
 #include <geometry_msgs/Pose.h>

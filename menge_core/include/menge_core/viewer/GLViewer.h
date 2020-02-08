@@ -60,6 +60,8 @@ Any questions or comments should be sent to the authors {menge,geom}@cs.unc.edu
 
 // ROS
 #include <ros/ros.h>
+#include <ros/spinner.h>
+#include <ros/callback_queue.h>
 #include <std_msgs/Bool.h>
 
 
@@ -108,8 +110,10 @@ namespace Menge {
 			 *	@brief		Runs the main loop -- including advancing the scene
 			 *				in time.  Exiting this function means the main event
 			 *				loop is no longer running.
+			 *
+			 *	@param      &queue          ROS callback queue handling the control of the viewer
 			 */
-			void run();
+            void run(ros::CallbackQueue &queue);
 
 			/*!
 			 *	@brief		Sets the optional background image to the viewer.
@@ -302,10 +306,12 @@ namespace Menge {
 
             void setRunFromMsg(const std_msgs::Bool::ConstPtr& msg);
 
-			void addNodeHandle( ros::NodeHandle *nh){
+			void addNodeHandle( ros::NodeHandle *nh, ros::CallbackQueue &queue){
 				_nh = nh;
+				_nh->setCallbackQueue(&queue);
 				_sub_step = _nh->subscribe("step", 1000, &Menge::Vis::GLViewer::setStepFromMsg, this);
 				_sub_run = _nh->subscribe("run", 1000, &Menge::Vis::GLViewer::setRunFromMsg, this);
+                _spinner.reset(new ros::AsyncSpinner(0, &queue));
 			}
 			/*!
 			 *	@brief		return ROS node handle
@@ -455,6 +461,7 @@ namespace Menge {
             ros::NodeHandle *_nh;
             ros::Subscriber _sub_step;
             ros::Subscriber _sub_run;
+            boost::shared_ptr<ros::AsyncSpinner> _spinner;
 			/*!
 			 *	@brief		Initizlies the OpenGL lighting based on the set of lights.
 			 */

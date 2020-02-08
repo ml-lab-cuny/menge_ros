@@ -50,6 +50,8 @@ Any questions or comments should be sent to the authors {menge,geom}@cs.unc.edu
 
 // ROS
 #include <ros/ros.h>
+#include <ros/spinner.h>
+#include <ros/callback_queue.h>
 #include <std_msgs/Bool.h>
 
 namespace Menge {
@@ -92,8 +94,10 @@ namespace Menge {
 
 			/*!
 			 *	@brief		The main loop.
+			 *
+			 *	@param      &queue          ROS callback queue handling the control of the viewer
 			 */
-			void run();
+			void run(ros::CallbackQueue &queue);
 
 			/*!
 			 *	@brief		Sets the simulator to use a fixed time step, with the given value.
@@ -113,10 +117,12 @@ namespace Menge {
 
             void setRunFromMsg(const std_msgs::Bool::ConstPtr& msg);
 
-            void addNodeHandle( ros::NodeHandle *nh){
+            void addNodeHandle( ros::NodeHandle *nh, ros::CallbackQueue &queue){
                 _nh = nh;
+                _nh->setCallbackQueue(&queue);
                 _sub_step = _nh->subscribe("step", 1000, &Menge::Vis::NullViewer::setStepFromMsg, this);
                 _sub_run = _nh->subscribe("run", 1000, &Menge::Vis::NullViewer::setRunFromMsg, this);
+                _spinner.reset(new ros::AsyncSpinner(0, &queue));
             }
             /*!
              *	@brief		return ROS node handle
@@ -158,6 +164,7 @@ namespace Menge {
             ros::NodeHandle *_nh;
             ros::Subscriber _sub_step;
             ros::Subscriber _sub_run;
+            boost::shared_ptr<ros::AsyncSpinner> _spinner;
 		};
 	}	// namespace Vis
 }	// namespace Menge

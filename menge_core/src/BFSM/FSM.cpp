@@ -212,9 +212,15 @@ namespace Menge {
 				//std::cout << "External Agent detected : " << ID << std::endl;
 				prefVelMsg.setSpeed(0.0);
 				//std::cout << "Before spin "<< std::endl;
+//                ROS_INFO("speed before: [%f]", prefVelMsg.getSpeed());
+//                ROS_INFO("preferred before: x: [%f], y: [%f]", prefVelMsg.getPreferred()._x, prefVelMsg.getPreferred()._y);
 				ros::spinOnce();
-				//std::cout << "After spin "<< std::endl;
+                //std::cout << "After spin "<< std::endl;
+//                ROS_INFO("speed after: [%f]", prefVelMsg.getSpeed());
+//                ROS_INFO("preferred after: x: [%f], y: [%f]", prefVelMsg.getPreferred()._x, prefVelMsg.getPreferred()._y);
+
 				newVel = prefVelMsg;
+
 				std::cout << (newVel.getPreferred()).x() << " : " << (newVel.getPreferred()).y() << std::endl;
 				//std::cout << "Direction Set from the ROS message!" << std::endl;
 			}
