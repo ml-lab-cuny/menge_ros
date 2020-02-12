@@ -514,6 +514,8 @@ namespace Menge {
   			current_time = ros::Time::now();
 			geometry_msgs::PoseArray crowd;
 			geometry_msgs::PoseArray crowd_all;
+			visualization_msgs::MarkerArray crowd_expansion;
+			visualization_msgs::MarkerArray crowd_expansion_all;
 			Vector2 robot_pos;
 			Vector2 robot_orient;
 			float robot_angle;
@@ -628,12 +630,30 @@ namespace Menge {
 				Agents::BaseAgent * agt = this->_sim->getAgent( a );
 				Vector2 agent_pos = agt->_pos;
 				Vector2 agent_orient = agt->_orient;
+				float agent_radius = agt->_radius;
 				geometry_msgs::Pose pose;
+				visualization_msgs::Marker marker;
 				pose.position.x = agent_pos._x;
 				pose.position.y = agent_pos._y;
 				pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0.0, 0.0, atan2(agt->_orient._y, agt->_orient._x));
+				// make visualization markers with correct expansion of the agents
+				marker.header.stamp = current_time;
+				marker.header.frame_id = "map";
+				marker.ns = "agent_expansion";
+				marker.id = a + 10;
+				marker.action = visualization_msgs::Marker::ADD;
+				marker.type = visualization_msgs::Marker::SPHERE;
+				marker.color.a = 1.0;
+                marker.color.r = 0.0;
+                marker.color.g = 0.1;
+                marker.color.b = 0.0;
+				marker.pose = pose;
+				marker.scale.x = agent_radius;
+				marker.scale.y = agent_radius;
+				marker.scale.z = 0.1;
 				if(!agt->_isExternal){
 					crowd_all.poses.push_back(pose);
+					crowd_expansion_all.markers.push_back(marker);
 				}
 				if(_sim->queryVisibility(agent_pos,robot_pos, 0.1) and !agt->_isExternal){
 					double dx = agent_pos._x - robot_pos._x;
@@ -658,6 +678,7 @@ namespace Menge {
 					}
 					if(distance < robot_range_max and difference > robot_start_fov and difference < robot_end_fov){
 						crowd.poses.push_back(pose);
+						crowd_expansion.markers.push_back(marker);
 					}
 				}
 			}
@@ -665,10 +686,12 @@ namespace Menge {
 			crowd.header.stamp = current_time;
 			crowd.header.frame_id = "map";
 			_pub_crowd.publish(crowd);
+			_pub_crowd_marker.publish(crowd_expansion);
 
 			crowd_all.header.stamp = current_time;
 			crowd_all.header.frame_id = "map";
 			_pub_crowd_all.publish(crowd_all);
+			_pub_crowd_marker_all.publish(crowd_expansion_all);
 
 			if ( exceptionCount > 0 ) {
 				throw FSMFatalException();

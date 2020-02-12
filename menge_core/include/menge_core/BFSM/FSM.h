@@ -63,6 +63,8 @@ Any questions or comments should be sent to the authors {menge,geom}@cs.unc.edu
 #include <geometry_msgs/PoseArray.h>
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/PoseStamped.h>
+#include <visualization_msgs/MarkerArray.h>
+#include <visualization_msgs/Marker.h>
 #include <tf/transform_broadcaster.h>
 #include <nav_msgs/Odometry.h>
 #include <sensor_msgs/LaserScan.h>
@@ -393,6 +395,8 @@ namespace Menge {
 				_sub = _nh->subscribe("cmd_vel", 1000, &Menge::BFSM::FSM::setPrefVelFromMsg, this);
 				_pub_crowd = _nh->advertise<geometry_msgs::PoseArray>("crowd_pose", 50);
 				_pub_crowd_all = _nh->advertise<geometry_msgs::PoseArray>("crowd_pose_all", 50);
+				_pub_crowd_marker = _nh->advertise<visualization_msgs::MarkerArray>("crowd_expansion", 50);
+				_pub_crowd_marker_all = _nh->advertise<visualization_msgs::MarkerArray>("crowd_expansion_all", 50);
 				//_pub_odom = _nh->advertise<nav_msgs::Odometry>("odom", 50);
 				_pub_pose = _nh->advertise<geometry_msgs::PoseStamped>("pose", 50);
 				_pub_scan = _nh->advertise<sensor_msgs::LaserScan>("base_scan", 50);
@@ -453,6 +457,8 @@ namespace Menge {
 			ros::Subscriber _sub;
 			ros::Publisher _pub_crowd;
 			ros::Publisher _pub_crowd_all;
+			ros::Publisher _pub_crowd_marker;
+			ros::Publisher _pub_crowd_marker_all;
 			ros::Publisher _pub_pose;
 			ros::Publisher _pub_odom;
 			ros::Publisher _pub_scan;
