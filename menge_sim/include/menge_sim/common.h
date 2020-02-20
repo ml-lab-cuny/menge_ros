@@ -51,9 +51,9 @@ Any questions or comments should be sent to the authors {menge,geom}@cs.unc.edu
 #include <iostream>
 #include <cassert>
 #include "macros.h"
-#include "math/vector.h"
-#include "math/consts.h"
-#include "math/Matrix.h"
+#include "Math/vector.h"
+#include "Math/consts.h"
+#include "Math/Matrix.h"
 using namespace Menge::Math; 
 
 #endif	 // __COMMON_H__
