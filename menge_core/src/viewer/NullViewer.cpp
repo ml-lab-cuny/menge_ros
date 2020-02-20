@@ -77,14 +77,29 @@ namespace Menge {
 
         void NullViewer::setStepFromMsg(const std_msgs::Bool::ConstPtr& msg) {
             //copy from message and into step
-            ROS_INFO("msg received on /step:\n\tmake next sim step : [%s]", msg->data ? "true" : "false");
+            ROS_DEBUG("msg received on /step:\n\tmake next sim step : [%s]", msg->data ? "true" : "false");
             _step = msg->data;
         }
 
         void NullViewer::setRunFromMsg(const std_msgs::Bool::ConstPtr& msg) {
             //copy from message and into pause
-            ROS_INFO("msg received on /run:\n\tSimulation set to running : [%s]", msg->data ? "true" : "false");
+            ROS_DEBUG("msg received on /run:\n\tSimulation set to running : [%s]", msg->data ? "true" : "false");
             _pause = !msg->data;
+        }
+
+        bool NullViewer::setStepFromSrv(menge_core::RunSim::Request &req, menge_core::RunSim::Response &res) {
+            ROS_DEBUG("Service request received");
+            if (_pause) {
+                ros::getGlobalCallbackQueue()->clear();
+                _spinner->start();
+                _srv_run_received = true;
+                _srv_num_steps = req.numSteps;
+                _srv_start_time = _viewTime;
+                res.done = true;
+            } else {
+                res.done = false;
+            }
+            return true;
         }
 
 		/////////////////////////////////////////////////////////////////////////////
@@ -92,23 +107,36 @@ namespace Menge {
 		void NullViewer::run(ros::CallbackQueue &queue) {
 
 			if ( _scene == 0x0 ) return;
-			float viewTime = 0.f;
+			_viewTime = 0.f;
 			float frameLen = 0.f;
-            bool updated;
+            _scene_updated = false;
             _pause = true;
             bool lastItrPaused = _pause;
             _step = false;
             bool lastItrStep = _step;
 			_fpsTimer.start();
+            _srv_run_received = false;
+            _srv_start_time = _viewTime;
+            _srv_num_steps = 0;
+            std_msgs::Bool done_msg;
+            done_msg.data = true;
 
 			while ( ros::ok() ) {
-                updated = false;
-
                 queue.callAvailable(ros::WallDuration());
 
+                if (_srv_run_received) {
+                    if (_viewTime < _srv_start_time + _srv_num_steps * _stepSize) {
+                        _pause = false;
+                    } else {
+                        _pause = true;
+                        _srv_run_received = false;
+                        _pub_done.publish(done_msg);
+                    }
+                }
+
                 // restart spinner and timer after pause
-                if (lastItrPaused && !_pause) {
-                    ROS_INFO("Switched from pause to running after update");
+                if (lastItrPaused && !_pause && !_srv_run_received) {
+                    ROS_DEBUG("Switched from pause to running after update");
                     ros::getGlobalCallbackQueue()->clear();
                     _spinner->start();
                     _fpsTimer.restart();
@@ -117,21 +145,25 @@ namespace Menge {
                     _spinner->stop();
                     lastItrStep = false;
                 }
+
+                if (_scene_updated) {
+                    _scene_updated = false;
+                }
                 // make simulation step if requested
                 if (_pause && _step) {
                     _spinner->start();
-                    viewTime += _stepSize;
-                    updated = true;
+                    _viewTime += _stepSize;
+                    _scene_updated = true;
                     _step = false;
                     lastItrStep = true;
                 } else if (!_pause) {
-                    viewTime += _stepSize;
-                    updated = true;
+                    _viewTime += _stepSize;
+                    _scene_updated = true;
                 }
 
-                if (updated) {
+                if (_scene_updated) {
                     try {
-                        _scene->updateScene(viewTime);
+                        _scene->updateScene(_viewTime);
                         _fpsTimer.lap();
                     } catch (SceneGraph::SystemStopException) {
                         break;

@@ -182,15 +182,30 @@ namespace Menge {
 
 		void GLViewer::setStepFromMsg(const std_msgs::Bool::ConstPtr& msg) {
             //copy from message and into step
-            ROS_INFO("msg received on /step:\n\tmake next sim step : [%s]", msg->data ? "true" : "false");
+            ROS_DEBUG("msg received on /step:\n\tmake next sim step : [%s]", msg->data ? "true" : "false");
             _step = msg->data;
 		}
 
         void GLViewer::setRunFromMsg(const std_msgs::Bool::ConstPtr& msg) {
             //copy from message and into pause
-            ROS_INFO("msg received on /run:\n\tSimulation set to running : [%s]", msg->data ? "true" : "false");
+            ROS_DEBUG("msg received on /run:\n\tSimulation set to running : [%s]", msg->data ? "true" : "false");
             _pause = !msg->data;
         }
+
+        bool GLViewer::setStepFromSrv(menge_core::RunSim::Request &req, menge_core::RunSim::Response &res) {
+            ROS_DEBUG("Service request received");
+		    if (_pause) {
+                ros::getGlobalCallbackQueue()->clear();
+                _spinner->start();
+		        _srv_run_received = true;
+                _srv_num_steps = req.numSteps;
+                _srv_start_time = _viewTime;
+                res.done = true;
+		    } else {
+		        res.done = false;
+		    }
+		    return true;
+		}
 
         ///////////////////////////////////////////////////////////////////////////
 		void GLViewer::run(ros::CallbackQueue &queue) {
@@ -199,6 +214,11 @@ namespace Menge {
             bool lastItrPaused = _pause;
             bool lastItrStep = _step;
 			_fpsDisplayTimer.start();
+			_srv_run_received = false;
+            _srv_start_time = _viewTime;
+            _srv_num_steps = 0;
+            std_msgs::Bool done_msg;
+            done_msg.data = true;
 
 			while ( _running ) {
 				SDL_Event e;
@@ -223,11 +243,22 @@ namespace Menge {
                 // handle ROS messages
 				queue.callAvailable(ros::WallDuration());
 
+				if (_srv_run_received) {
+				    if (_viewTime < _srv_start_time + _srv_num_steps * _stepSize) {
+				        _pause = false;
+				    } else {
+				        _pause = true;
+				        _srv_run_received = false;
+                        _pub_done.publish(done_msg);
+				    }
+				}
+
 				// restart spinner after pause
-                if (lastItrPaused && !_pause) {
-                    ROS_INFO("Switched from pause to running after update");
+                if (lastItrPaused && !_pause && !_srv_run_received) {
+                    ROS_DEBUG("Switched from pause to running after update");
                     ros::getGlobalCallbackQueue()->clear();
                     _spinner->start();
+
                 // stop spinner after pausing simulation or after executing step
                 } else if ((!lastItrPaused && _pause) || lastItrStep) {
                     _spinner->stop();
@@ -271,9 +302,9 @@ namespace Menge {
 						stopTimer( BUFFER_SWAP );
 						redraw = false;
 					}
-					if ( !_pause ) lapTimer( FULL_FRAME );			
+					if ( !_pause ) lapTimer( FULL_FRAME );
 				}
-
+				
 				if ( ( !_pause || _update ) && _dumpImages ) {
 					std::stringstream fullPath;				
 					fullPath << _dumpPath << "img";
