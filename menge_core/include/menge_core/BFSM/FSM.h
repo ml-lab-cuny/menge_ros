@@ -3,7 +3,7 @@
 License
 
 Menge
-Copyright © and trademark ™ 2012-14 University of North Carolina at Chapel Hill. 
+Copyright ï¿½ and trademark ï¿½ 2012-14 University of North Carolina at Chapel Hill. 
 All rights reserved.
 
 Permission to use, copy, modify, and distribute this software and its documentation 
@@ -366,8 +366,8 @@ namespace Menge {
 			float distanceFromObstacle(float angle, float range_max, Agents::BaseAgent * agent);
 
 			float distanceFromAgent(float angle, float range_max, Agents::BaseAgent * agent);
-			float nearAgentDistance(Vector2 start, Vector2 end);
-			float intersect(Vector2 start, Vector2 end, Vector2 circle, float radius);
+			float nearAgentDistance(const Vector2& start, Vector2 end);
+			float intersect(const Vector2& start, Vector2 end, Vector2 circle, float radius);
 			bool in_between(Vector2 start, Vector2 point, Vector2 end);
 
 
@@ -411,7 +411,7 @@ namespace Menge {
 			 */
 			ros::NodeHandle* getNodeHandle(){return _nh;}
 
-			void transformToEndpoints(Vector2 pos, float angle, sensor_msgs::LaserScan ls, geometry_msgs::PoseArray& end_array);
+			static void transformToEndpoints(const Vector2& pos, float angle, const sensor_msgs::LaserScan& ls, geometry_msgs::PoseArray& end_array);
 
 		protected:
 			/*!

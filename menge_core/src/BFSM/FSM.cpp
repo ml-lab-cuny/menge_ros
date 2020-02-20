@@ -80,8 +80,8 @@ namespace Menge {
 			for ( ; gsItr != _goalSets.end(); ++gsItr ) {
 				delete gsItr->second;
 			}
-			for ( size_t i = 0; i < _tasks.size(); ++i ) {
-				_tasks[ i ]->destroy();
+			for (auto & _task : _tasks) {
+				_task->destroy();
 			}
 			_tasks.clear();
 		}
@@ -108,8 +108,8 @@ namespace Menge {
 		 
 		void FSM::addTask( Task * task ) {
 			if ( task ) {
-				for ( size_t i = 0; i < _tasks.size(); ++i ) {
-					if ( task->isEquivalent( _tasks[i] ) ) {
+				for (auto & _task : _tasks) {
+					if ( task->isEquivalent( _task ) ) {
 						task->destroy();
 						return;
 					}
@@ -145,12 +145,8 @@ namespace Menge {
 		 
 		void FSM::setPrefVelFromMsg( const geometry_msgs::Twist& msg){
 			//copy from message and into PrefVelmsg
-			ROS_INFO("I heard: x :[%f]", msg.linear.x);
-   			ROS_INFO("I heard: y :[%f]", msg.linear.y);
-   			ROS_INFO("I heard: z :[%f]", msg.linear.z);
-   			ROS_INFO("I heard: x :[%f]", msg.angular.x);
-   			ROS_INFO("I heard: y :[%f]", msg.angular.y);
-   			ROS_INFO("I heard: z :[%f]", msg.angular.z);
+			ROS_INFO("I heard: linear x :[%f]", msg.linear.x);
+   			ROS_INFO("I heard: angular z :[%f]", msg.angular.z);
 
    			// TODO: make robot non-holonomic here
 
@@ -212,12 +208,12 @@ namespace Menge {
 				//std::cout << "External Agent detected : " << ID << std::endl;
 				prefVelMsg.setSpeed(0.0);
 				//std::cout << "Before spin "<< std::endl;
-//                ROS_INFO("speed before: [%f]", prefVelMsg.getSpeed());
-//                ROS_INFO("preferred before: x: [%f], y: [%f]", prefVelMsg.getPreferred()._x, prefVelMsg.getPreferred()._y);
+                ROS_DEBUG("speed before: [%f]", prefVelMsg.getSpeed());
+                ROS_DEBUG("preferred before: x: [%f], y: [%f]", prefVelMsg.getPreferred()._x, prefVelMsg.getPreferred()._y);
 				ros::spinOnce();
                 //std::cout << "After spin "<< std::endl;
-//                ROS_INFO("speed after: [%f]", prefVelMsg.getSpeed());
-//                ROS_INFO("preferred after: x: [%f], y: [%f]", prefVelMsg.getPreferred()._x, prefVelMsg.getPreferred()._y);
+                ROS_DEBUG("speed after: [%f]", prefVelMsg.getSpeed());
+                ROS_DEBUG("preferred after: x: [%f], y: [%f]", prefVelMsg.getPreferred()._x, prefVelMsg.getPreferred()._y);
 
 				newVel = prefVelMsg;
 
@@ -229,7 +225,7 @@ namespace Menge {
 			agent->setPreferredVelocity(newVel);
 		}
 
-		void FSM::transformToEndpoints(Vector2 pos, float angle, sensor_msgs::LaserScan ls, geometry_msgs::PoseArray& end_array) {
+		void FSM::transformToEndpoints(const Vector2& pos, float angle, const sensor_msgs::LaserScan& ls, geometry_msgs::PoseArray& end_array) {
     			ROS_DEBUG("Convert laser scan to endpoints");
     			double start_angle = ls.angle_min;
     			double increment = ls.angle_increment;
@@ -238,10 +234,10 @@ namespace Menge {
     			double r_y = pos._y;
     			double r_ang = angle;
     			
-    			for(int i = 0 ; i < ls.ranges.size(); i++){
+    			for(float range : ls.ranges){
 				    geometry_msgs::Pose pose;
-				    pose.position.x = r_x + (ls.ranges[i] * cos(start_angle + r_ang));
-				    pose.position.y = r_y + (ls.ranges[i] * sin(start_angle + r_ang));
+				    pose.position.x = r_x + (range * cos(start_angle + r_ang));
+				    pose.position.y = r_y + (range * sin(start_angle + r_ang));
 				    end_array.poses.push_back(pose);
        				start_angle += increment;
     			}
@@ -348,12 +344,12 @@ namespace Menge {
 		}
 
 		//return true if start and end are visible to each other 
-		float FSM::nearAgentDistance(Vector2 start, Vector2 end){
+		float FSM::nearAgentDistance(const Vector2& start, Vector2 end){
 			float distance = start.distance(end);
 			int agtCount = (int)this->_sim->getNumAgents();
 			for ( int a = 0; a < agtCount; ++a ) {
 				Agents::BaseAgent * agt = this->_sim->getAgent( a );
-				if(agt->_isExternal == false){
+				if(!agt->_isExternal){
 					//the agent in question is a crowd agent
 					Vector2 agent_pos = agt->_pos;
 					float radius = agt->_radius;
@@ -365,7 +361,7 @@ namespace Menge {
 			return distance;
 		}
 
-		float FSM::intersect(Vector2 start, Vector2 end, Vector2 circle, float radius){
+		float FSM::intersect(const Vector2& start, Vector2 end, Vector2 circle, float radius){
 			double r = radius;
   			double cx = circle._x;
   			double cy = circle._y;
@@ -396,12 +392,7 @@ namespace Menge {
 			float ac = start.distance(end);
 			float ab = start.distance(point);
 			float bc = point.distance(end);
-			if((ab + bc - ac) < 0.01){
-				return true;
-			}
-			else{
-				return false;
-			}
+            return (ab + bc - ac) < 0.01;
 		}
 
 
@@ -640,19 +631,19 @@ namespace Menge {
 				marker.header.stamp = current_time;
 				marker.header.frame_id = "map";
 				marker.ns = "agent_expansion";
-				marker.id = a + 10;
 				marker.action = visualization_msgs::Marker::ADD;
 				marker.type = visualization_msgs::Marker::SPHERE;
 				marker.color.a = 1.0;
-                marker.color.r = 0.0;
+                marker.color.r = 1.0;
                 marker.color.g = 0.1;
                 marker.color.b = 0.0;
 				marker.pose = pose;
-				marker.scale.x = agent_radius;
-				marker.scale.y = agent_radius;
+				marker.scale.x = 2 * agent_radius;
+				marker.scale.y = 2 * agent_radius;
 				marker.scale.z = 0.1;
 				if(!agt->_isExternal){
 					crowd_all.poses.push_back(pose);
+                    marker.id = 2 * a;  // FOV independent markers even odd id
 					crowd_expansion_all.markers.push_back(marker);
 				}
 				if(_sim->queryVisibility(agent_pos,robot_pos, 0.1) and !agt->_isExternal){
@@ -678,7 +669,8 @@ namespace Menge {
 					}
 					if(distance < robot_range_max and difference > robot_start_fov and difference < robot_end_fov){
 						crowd.poses.push_back(pose);
-						crowd_expansion.markers.push_back(marker);
+                        marker.id = 2 * a + 1;  // FOV dependent markers get odd id
+                        crowd_expansion.markers.push_back(marker);
 					}
 				}
 			}
@@ -726,9 +718,9 @@ namespace Menge {
 		FsmContext * FSM::getContext() {
 			FsmContext * ctx = new FsmContext( this );
 			// TODO: Populate the context
-			for ( size_t i = 0; i < _nodes.size(); ++i ) {
-				StateContext * sCtx = new StateContext( _nodes[ i ] );
-				ctx->addStateContext( _nodes[i]->getID(), sCtx );
+			for (auto & _node : _nodes) {
+				StateContext * sCtx = new StateContext( _node );
+				ctx->addStateContext( _node->getID(), sCtx );
 			}
 			
 			return ctx;
