@@ -1,0 +1,24 @@
+<launch>
+    <arg name="rviz" doc="Activate rviz visualization" default="true"/>
+    <arg name="project" doc="Path to the Menge project xml" />
+    <arg name="ped_model" default="!" doc="Which pedestrian model to use [orca, pedsim]" />
+    <arg name="timeout" default="!" doc="Maximum duration of simulation (if final state is not achieved.)" />
+    <arg name="timestep" default="!" doc="Simulation time step" />
+    
+    <arg name="model_resolved" value="$(eval '' if arg('ped_model')=='!' else '-m ' + arg('ped_model'))" />
+    <arg name="timeout_resolved" value="$(eval '' if arg('timeout')=='!' else '-d ' + str(arg('timeout')))" />
+    <arg name="timestep_resolved" value="$(eval '' if arg('timestep')=='!' else '-t ' + str(arg('timestep')))" />    
+
+    <node name="menge_sim" 
+          pkg="menge_sim" 
+          type="menge_sim"
+          args="-p $(arg project) $(arg model_resolved) $(arg timeout_resolved) $(arg timestep_resolved)" 
+          output="screen" />
+
+    <group if="$(arg rviz)">
+        <node type="rviz" 
+              name="rviz" 
+              pkg="rviz" 
+              args="-d $(find menge_vis)/rviz/menge_ros.rviz" />
+    </group>
+</launch>
