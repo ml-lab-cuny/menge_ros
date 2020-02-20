@@ -1,0 +1,32 @@
+#!/usr/bin/env python3
+
+from envs import MengeGym
+import numpy as np
+import rospy as rp
+
+
+def main():
+
+    env = MengeGym('/home/julian/Desktop/test_data/test.xml')
+    rp.sleep(5)
+    try:
+        done = False
+        while not done:
+            action = env.action_space.sample()
+            ob, reward, done, info = env.step(np.array([env.action_space.nvec[0] - 1, np.median(range(env.action_space.nvec[1]))], dtype=np.int32))
+            # if done:
+            #     print(info)
+            #     env.reset()
+            # else:
+            rp.loginfo('Reward: %f' % reward)
+            env.render()
+        rp.loginfo(info)
+        rp.loginfo('Finished cleanly')
+        env.close()
+    except Exception as e:
+        env.close()
+        raise e
+
+
+if __name__ == "__main__":
+    main()
